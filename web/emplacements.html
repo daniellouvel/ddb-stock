@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Emplacements - DDB-Stock</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tree-item {
+            margin-left: 20px;
+            padding-left: 10px;
+            border-left: 2px solid #e5e7eb;
+        }
+        .niveau-1 { color: #1e40af; font-weight: bold; }
+        .niveau-2 { color: #059669; }
+        .niveau-3 { color: #d97706; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold">🏠 DDB-Stock</h1>
+                    <p class="text-blue-200">Gestion des Emplacements</p>
+                </div>
+                <nav class="space-x-4">
+                    <a href="index.html" class="hover:text-blue-200">Dashboard</a>
+                    <a href="produits.html" class="hover:text-blue-200">Produits</a>
+                    <a href="emplacements.html" class="text-white font-bold">Emplacements</a>
+                    <a href="articles.html" class="hover:text-blue-200">Articles</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Formulaire Ajout -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold mb-4 text-gray-800">➕ Ajouter un Emplacement</h2>
+                
+                <form id="formEmplacement" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Code Emplacement *
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="text" id="code_emplacement" 
+                                   placeholder="EMP001" 
+                                   required
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button type="button" 
+                                    onclick="genererCodeSuivant()" 
+                                    class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-md transition text-sm whitespace-nowrap">
+                                🔄 Suivant
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Format: EMP### (ex: EMP001, emp002, Emp003)</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Nom *
+                        </label>
+                        <input type="text" id="nom" 
+                               placeholder="Garage, Étagère A, Boîte rouge..." 
+                               required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Emplacement Parent (optionnel)
+                        </label>
+                        <select id="parent_id" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">-- Aucun (niveau racine) --</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Niveau Hiérarchique
+                        </label>
+                        <select id="niveau" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="1">Niveau 1 - Pièce/Zone</option>
+                            <option value="2">Niveau 2 - Meuble/Étagère</option>
+                            <option value="3">Niveau 3 - Boîte/Tiroir</option>
+                            <option value="4">Niveau 4 - Compartiment</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Description
+                        </label>
+                        <textarea id="description" 
+                                  rows="3" 
+                                  placeholder="Description détaillée de l'emplacement..."
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button type="submit" 
+                                class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition">
+                            ➕ Ajouter
+                        </button>
+                        <button type="button" 
+                                onclick="resetForm()"
+                                class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition">
+                            Annuler
+                        </button>
+                    </div>
+                </form>
+
+                <div id="message" class="mt-4 hidden"></div>
+            </div>
+
+            <!-- Liste des Emplacements -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">📦 Liste des Emplacements</h2>
+                    <button onclick="chargerEmplacements()" 
+                            class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition text-sm">
+                        🔄 Rafraîchir
+                    </button>
+                </div>
+
+                <div class="mb-4">
+                    <input type="text" 
+                           id="searchInput" 
+                           placeholder="🔍 Rechercher un emplacement..."
+                           onkeyup="filtrerEmplacements()"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div id="listeEmplacements" class="space-y-2 max-h-[600px] overflow-y-auto">
+                    <div class="text-center text-gray-500 py-8">
+                        Chargement...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://' + window.location.hostname + ':8000';
+        let emplacements = [];
+
+        // Charger les emplacements au démarrage
+        window.onload = function() {
+            chargerEmplacements();
+        };
+
+        // Charger tous les emplacements
+        async function chargerEmplacements() {
+            try {
+                const response = await fetch(`${API_URL}/emplacements/`);
+                emplacements = await response.json();
+                
+                afficherEmplacements();
+                chargerOptionsParent();
+                genererCodeSuivant(); // Auto-générer le code au chargement
+            } catch (error) {
+                document.getElementById('listeEmplacements').innerHTML = 
+                    '<div class="text-red-600 text-center py-4">❌ Erreur de chargement</div>';
+                console.error('Erreur:', error);
+            }
+        }
+
+        // Générer le prochain code disponible
+        function genererCodeSuivant() {
+            if (emplacements.length === 0) {
+                document.getElementById('code_emplacement').value = 'EMP001';
+                return;
+            }
+
+            // Extraire tous les numéros existants
+            const numeros = emplacements
+                .map(e => {
+                    const match = e.code_emplacement.toUpperCase().match(/EMP(\d+)/);
+                    return match ? parseInt(match[1]) : 0;
+                })
+                .filter(n => n > 0);
+
+            // Trouver le plus grand numéro
+            const maxNumero = Math.max(...numeros, 0);
+            
+            // Générer le suivant
+            const nouveauNumero = (maxNumero + 1).toString().padStart(3, '0');
+            document.getElementById('code_emplacement').value = `EMP${nouveauNumero}`;
+        }
+
+        // Afficher les emplacements en arborescence
+        function afficherEmplacements() {
+            const container = document.getElementById('listeEmplacements');
+            
+            if (emplacements.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-8">Aucun emplacement</div>';
+                return;
+            }
+
+            // Organiser par hiérarchie
+            const racines = emplacements.filter(e => !e.parent_id);
+            
+            let html = '';
+            racines.forEach(racine => {
+                html += afficherEmplacementRecursif(racine, 0);
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Afficher récursivement les emplacements
+        function afficherEmplacementRecursif(emplacement, profondeur) {
+            const enfants = emplacements.filter(e => e.parent_id === emplacement.id);
+            const indent = profondeur * 20;
+            
+            let html = `
+                <div class="border border-gray-200 rounded-md p-3 hover:bg-gray-50 transition emplacement-item" 
+                     style="margin-left: ${indent}px;"
+                     data-nom="${emplacement.nom.toLowerCase()}"
+                     data-code="${emplacement.code_emplacement.toLowerCase()}">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="font-semibold niveau-${emplacement.niveau}">
+                                ${profondeur > 0 ? '└─ ' : ''}
+                                ${emplacement.nom}
+                                <span class="text-xs text-gray-500 font-normal ml-2">(${emplacement.code_emplacement})</span>
+                            </div>
+                            ${emplacement.description ? 
+                                `<div class="text-sm text-gray-600 mt-1">${emplacement.description}</div>` : 
+                                ''}
+                            <div class="text-xs text-gray-400 mt-1">
+                                Niveau ${emplacement.niveau}
+                                ${enfants.length > 0 ? ` • ${enfants.length} sous-emplacement(s)` : ''}
+                            </div>
+                        </div>
+                        <div class="flex gap-2 ml-4">
+                            <button onclick="modifierEmplacement(${emplacement.id})" 
+                                    class="text-blue-600 hover:text-blue-800 text-sm px-2 py-1">
+                                ✏️
+                            </button>
+                            <button onclick="supprimerEmplacement(${emplacement.id}, '${emplacement.nom.replace(/'/g, "\\'")}', ${enfants.length})" 
+                                    class="text-red-600 hover:text-red-800 text-sm px-2 py-1">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Ajouter les enfants
+            enfants.forEach(enfant => {
+                html += afficherEmplacementRecursif(enfant, profondeur + 1);
+            });
+
+            return html;
+        }
+
+        // Charger les options pour le select parent AVEC HIÉRARCHIE
+        function chargerOptionsParent() {
+            const select = document.getElementById('parent_id');
+            const optionActuelle = select.value;
+            
+            select.innerHTML = '<option value="">-- Aucun (niveau racine) --</option>';
+            
+            // Fonction récursive pour afficher la hiérarchie
+            function ajouterEmplacementRecursif(emplacement, profondeur) {
+                const option = document.createElement('option');
+                option.value = emplacement.id;
+                
+                // Indentation visuelle avec tirets
+                const indent = '—'.repeat(profondeur);
+                const prefix = profondeur > 0 ? ' ' : '';
+                
+                option.textContent = `${indent}${prefix}${emplacement.nom} (${emplacement.code_emplacement})`;
+                select.appendChild(option);
+                
+                // Ajouter les enfants
+                const enfants = emplacements.filter(e => e.parent_id === emplacement.id);
+                enfants.forEach(enfant => {
+                    ajouterEmplacementRecursif(enfant, profondeur + 1);
+                });
+            }
+            
+            // Commencer par les emplacements racine (sans parent)
+            const racines = emplacements.filter(e => !e.parent_id);
+            racines.forEach(racine => {
+                ajouterEmplacementRecursif(racine, 0);
+            });
+
+            if (optionActuelle) {
+                select.value = optionActuelle;
+            }
+        }
+
+        // Ajouter un emplacement
+        document.getElementById('formEmplacement').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Normaliser le code en majuscules
+            let codeEmplacement = document.getElementById('code_emplacement').value.toUpperCase();
+            
+            // Vérifier le format (insensible à la casse)
+            const regex = /^EMP\d{3}$/;
+            if (!regex.test(codeEmplacement)) {
+                const messageDiv = document.getElementById('message');
+                messageDiv.className = 'mt-4 p-3 bg-red-100 text-red-800 rounded-md';
+                messageDiv.textContent = '❌ Format invalide. Utilisez EMP### (ex: EMP001)';
+                messageDiv.classList.remove('hidden');
+                return;
+            }
+
+            const data = {
+                code_emplacement: codeEmplacement,
+                nom: document.getElementById('nom').value,
+                parent_id: document.getElementById('parent_id').value ? 
+                           parseInt(document.getElementById('parent_id').value) : null,
+                niveau: parseInt(document.getElementById('niveau').value),
+                description: document.getElementById('description').value || null
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/emplacements/`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                const messageDiv = document.getElementById('message');
+
+                if (response.ok) {
+                    messageDiv.className = 'mt-4 p-3 bg-green-100 text-green-800 rounded-md';
+                    messageDiv.textContent = '✅ Emplacement ajouté avec succès';
+                    messageDiv.classList.remove('hidden');
+                    
+                    resetForm();
+                    chargerEmplacements();
+
+                    setTimeout(() => messageDiv.classList.add('hidden'), 3000);
+                } else {
+                    const error = await response.json();
+                    messageDiv.className = 'mt-4 p-3 bg-red-100 text-red-800 rounded-md';
+                    messageDiv.textContent = '❌ Erreur: ' + error.detail;
+                    messageDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                alert('❌ Erreur de connexion à l\'API');
+                console.error(error);
+            }
+        });
+
+        // Réinitialiser le formulaire
+        function resetForm() {
+            document.getElementById('formEmplacement').reset();
+            document.getElementById('message').classList.add('hidden');
+            genererCodeSuivant(); // Regénérer le code
+        }
+
+        // Filtrer les emplacements
+        function filtrerEmplacements() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const items = document.querySelectorAll('.emplacement-item');
+
+            items.forEach(item => {
+                const nom = item.dataset.nom;
+                const code = item.dataset.code;
+                
+                if (nom.includes(search) || code.includes(search)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Modifier un emplacement (à implémenter)
+        function modifierEmplacement(id) {
+            alert('Fonctionnalité de modification à venir (ID: ' + id + ')');
+        }
+
+        // Supprimer un emplacement
+        async function supprimerEmplacement(id, nom, nbEnfants) {
+            let message = `Voulez-vous vraiment supprimer l'emplacement "${nom}" ?`;
+            
+            if (nbEnfants > 0) {
+                message += `\n\nAttention: ${nbEnfants} sous-emplacement(s) seront aussi affectés.`;
+            }
+            
+            if (!confirm(message)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/emplacements/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('✅ Emplacement supprimé');
+                    chargerEmplacements();
+                } else {
+                    const error = await response.json();
+                    alert('❌ Erreur: ' + error.detail);
+                }
+            } catch (error) {
+                alert('❌ Erreur de connexion');
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
+```
+
+---
+
+## ✅ Sauvegarder et Tester
+
+1. **Sauvegardez** : `Ctrl+X`, `Y`, `Enter`
+2. **Videz le cache** : `Ctrl+Shift+R`
+3. **Rechargez la page**
+
+---
+
+## 🎯 Améliorations Incluses
+
+### **1. Auto-génération du Code**
+- Bouton "🔄 Suivant" génère automatiquement le prochain code libre
+- Code pré-rempli au chargement de la page
+
+### **2. Insensible à la Casse**
+- `emp001`, `Emp001`, `EMP001` → tous convertis en `EMP001`
+
+### **3. Hiérarchie dans "Emplacement Parent"**
+```
+-- Aucun (niveau racine) --
+Maison (EMP001)
+— Garage (EMP002)
+—— Étagère 1 (EMP005)
+——— Boîte 1 (EMP009)
+—— Étagère 2 (EMP006)

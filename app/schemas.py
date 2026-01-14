@@ -1,0 +1,79 @@
+from pydantic import BaseModel, Field
+from datetime import datetime
+from typing import Optional
+
+# === PRODUIT ===
+class ProduitBase(BaseModel):
+    ean: Optional[str] = None
+    nom: str
+    marque: Optional[str] = None
+    description: Optional[str] = None
+
+class ProduitCreate(ProduitBase):
+    pass
+
+class ProduitUpdate(BaseModel):
+    ean: Optional[str] = None
+    nom: Optional[str] = None
+    marque: Optional[str] = None
+    description: Optional[str] = None
+
+class Produit(ProduitBase):
+    id: int
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
+
+# === EMPLACEMENT ===
+class EmplacementBase(BaseModel):
+    code_emplacement: str = Field(..., pattern="^EMP[0-9]{3}$")
+    nom: str
+    parent_id: Optional[int] = None
+    niveau: int = 1
+    description: Optional[str] = None
+
+class EmplacementCreate(EmplacementBase):
+    pass
+
+class EmplacementUpdate(BaseModel):
+    nom: Optional[str] = None
+    parent_id: Optional[int] = None
+    niveau: Optional[int] = None
+    description: Optional[str] = None
+
+class Emplacement(EmplacementBase):
+    id: int
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
+
+# === ARTICLE ===
+class ArticleBase(BaseModel):
+    code_article: str = Field(..., pattern="^GG[0-9]{4}$")
+    produit_id: int
+    emplacement_id: int
+    quantite: int = Field(default=1, ge=0)
+    date_peremption: Optional[datetime] = None
+    commentaire: Optional[str] = None
+
+class ArticleCreate(ArticleBase):
+    pass
+
+class ArticleUpdate(BaseModel):
+    produit_id: Optional[int] = None
+    emplacement_id: Optional[int] = None
+    quantite: Optional[int] = Field(None, ge=0)
+    date_peremption: Optional[datetime] = None
+    commentaire: Optional[str] = None
+
+class Article(ArticleBase):
+    id: int
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
