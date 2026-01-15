@@ -31,6 +31,7 @@ app.include_router(articles.router)
 
 # Servir fichiers statiques (frontend)
 app.mount("/web", StaticFiles(directory="/opt/ddb-stock/web", html=True), name="web")
+app.mount("/web-mobile", StaticFiles(directory="web-mobile"), name="web-mobile")
 
 @app.get("/")
 def root():

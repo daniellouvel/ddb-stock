@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDB-Stock v2 - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold">🏠 DDB-Stock v2</h1>
+                    <p class="text-blue-200">Gestion d'inventaire domestique</p>
+                </div>
+                <nav class="space-x-4">
+                    <a href="index.html" class="text-white font-bold">Dashboard</a>
+                    <a href="produits.html" class="hover:text-blue-200">Produits</a>
+                    <a href="emplacements.html" class="hover:text-blue-200">Emplacements</a>
+                    <a href="articles.html" class="hover:text-blue-200">Articles</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Statistiques -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Produits</p>
+                        <p class="text-3xl font-bold text-blue-600" id="statProduits">-</p>
+                    </div>
+                    <div class="text-4xl">📦</div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Emplacements</p>
+                        <p class="text-3xl font-bold text-green-600" id="statEmplacements">-</p>
+                    </div>
+                    <div class="text-4xl">📍</div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Articles</p>
+                        <p class="text-3xl font-bold text-purple-600" id="statArticles">-</p>
+                    </div>
+                    <div class="text-4xl">🏷️</div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Total Quantités</p>
+                        <p class="text-3xl font-bold text-orange-600" id="statQuantites">-</p>
+                    </div>
+                    <div class="text-4xl">📊</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accès rapides -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+                <h2 class="text-xl font-bold text-gray-800 mb-3">📦 Produits</h2>
+                <p class="text-gray-600 mb-4">Gérer le référentiel des produits (EAN, nom, marque, description)</p>
+                <a href="produits.html">
+                    <button class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition">
+                        Accéder →
+                    </button>
+                </a>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+                <h2 class="text-xl font-bold text-gray-800 mb-3">📍 Emplacements</h2>
+                <p class="text-gray-600 mb-4">Gérer la hiérarchie des lieux de stockage (pièces, meubles, boîtes)</p>
+                <a href="emplacements.html">
+                    <button class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition">
+                        Accéder →
+                    </button>
+                </a>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
+                <h2 class="text-xl font-bold text-gray-800 mb-3">🏷️ Articles</h2>
+                <p class="text-gray-600 mb-4">Gérer les articles physiques rangés (quantités, emplacements, péremption)</p>
+                <a href="articles.html">
+                    <button class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition">
+                        Accéder →
+                    </button>
+                </a>
+            </div>
+        </div>
+
+        <!-- Alertes -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">⚠️ Alertes et Notifications</h2>
+            <div id="alertes" class="space-y-3">
+                <div class="text-gray-500 text-center py-4">Chargement des alertes...</div>
+            </div>
+        </div>
+
+        <!-- Derniers articles ajoutés -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">📋 Derniers Articles Ajoutés</h2>
+                <button onclick="chargerDerniers()" class="text-blue-600 hover:text-blue-800 text-sm">
+                    🔄 Rafraîchir
+                </button>
+            </div>
+            <div id="derniersArticles" class="space-y-2">
+                <div class="text-gray-500 text-center py-4">Chargement...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12 py-6">
+        <div class="container mx-auto px-4 text-center">
+            <p>DDB-Stock v2.0 - Système de gestion d'inventaire domestique</p>
+            <p class="text-gray-400 text-sm mt-2">
+                <a href="http://192.168.1.200:8000/docs" target="_blank" class="hover:text-white">API Documentation</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        const API_URL = 'http://' + window.location.hostname + ':8000';
+
+        // Charger au démarrage
+        window.onload = function() {
+            chargerStatistiques();
+            chargerAlertes();
+            chargerDerniers();
+        };
+
+        // Charger les statistiques
+        async function chargerStatistiques() {
+            try {
+                // Produits
+                const produits = await fetch(`${API_URL}/produits/`).then(r => r.json());
+                document.getElementById('statProduits').textContent = produits.length;
+
+                // Emplacements
+                const emplacements = await fetch(`${API_URL}/emplacements/`).then(r => r.json());
+                document.getElementById('statEmplacements').textContent = emplacements.length;
+
+                // Articles
+                const articles = await fetch(`${API_URL}/articles/`).then(r => r.json());
+                document.getElementById('statArticles').textContent = articles.length;
+
+                // Total quantités
+                const totalQuantites = articles.reduce((sum, art) => sum + art.quantite, 0);
+                document.getElementById('statQuantites').textContent = totalQuantites;
+
+            } catch (error) {
+                console.error('Erreur chargement stats:', error);
+            }
+        }
+
+        // Charger les alertes
+        async function chargerAlertes() {
+            try {
+                // Articles proches péremption (30 jours)
+                const proche = await fetch(`${API_URL}/articles/peremption/prochaines?jours=30`).then(r => r.json());
+                
+                // Articles expirés
+                const expires = await fetch(`${API_URL}/articles/peremption/expirees`).then(r => r.json());
+
+                const container = document.getElementById('alertes');
+                let html = '';
+
+                if (expires.length > 0) {
+                    html += `
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4">
+                            <div class="flex items-center">
+                                <div class="text-2xl mr-3">🚨</div>
+                                <div>
+                                    <p class="font-bold text-red-800">Articles expirés</p>
+                                    <p class="text-red-600">${expires.length} article(s) périmé(s)</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (proche.length > 0) {
+                    html += `
+                        <div class="bg-orange-50 border-l-4 border-orange-500 p-4">
+                            <div class="flex items-center">
+                                <div class="text-2xl mr-3">⚠️</div>
+                                <div>
+                                    <p class="font-bold text-orange-800">Péremption proche</p>
+                                    <p class="text-orange-600">${proche.length} article(s) périment dans 30 jours</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (html === '') {
+                    html = '<div class="text-green-600 text-center py-4">✅ Aucune alerte</div>';
+                }
+
+                container.innerHTML = html;
+
+            } catch (error) {
+                document.getElementById('alertes').innerHTML = 
+                    '<div class="text-gray-500 text-center py-4">Erreur chargement alertes</div>';
+                console.error('Erreur:', error);
+            }
+        }
+
+        // Charger derniers articles
+        async function chargerDerniers() {
+            try {
+                const articles = await fetch(`${API_URL}/articles/`).then(r => r.json());
+                const produits = await fetch(`${API_URL}/produits/`).then(r => r.json());
+                const emplacements = await fetch(`${API_URL}/emplacements/`).then(r => r.json());
+
+                // Créer des maps pour recherche rapide
+                const produitsMap = {};
+                produits.forEach(p => produitsMap[p.id] = p);
+                
+                const emplacementsMap = {};
+                emplacements.forEach(e => emplacementsMap[e.id] = e);
+
+                // Prendre les 5 derniers
+                const derniers = articles.slice(-5).reverse();
+
+                const container = document.getElementById('derniersArticles');
+
+                if (derniers.length === 0) {
+                    container.innerHTML = '<div class="text-gray-500 text-center py-4">Aucun article</div>';
+                    return;
+                }
+
+                let html = '';
+                derniers.forEach(article => {
+                    const produit = produitsMap[article.produit_id] || {nom: 'Inconnu'};
+                    const emplacement = emplacementsMap[article.emplacement_id] || {nom: 'Inconnu', code_emplacement: '-'};
+                    
+                    html += `
+                        <div class="border border-gray-200 rounded-md p-3 hover:bg-gray-50 transition">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <div class="font-semibold text-gray-800">
+                                        ${article.code_article} - ${produit.nom}
+                                    </div>
+                                    <div class="text-sm text-gray-600 mt-1">
+                                        📍 ${emplacement.nom} (${emplacement.code_emplacement})
+                                        • Quantité: ${article.quantite}
+                                    </div>
+                                    ${article.commentaire ? 
+                                        `<div class="text-xs text-gray-500 mt-1">${article.commentaire}</div>` : 
+                                        ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+
+            } catch (error) {
+                document.getElementById('derniersArticles').innerHTML = 
+                    '<div class="text-gray-500 text-center py-4">Erreur chargement articles</div>';
+                console.error('Erreur:', error);
+            }
+        }
+    </script>
+</body>
+</html>
+```
+
+---
+
+## ✅ Sauvegarder et Tester
+
+**Accédez à votre dashboard** :
+```
+http://192.168.1.200:8000/web/
+```
+
+ou
+```
+http://192.168.1.200:8000/web/index.html
+```
+
+---
+
+## 🎯 Fonctionnalités du Dashboard
+
+✅ **4 Statistiques en temps réel** (Produits, Emplacements, Articles, Quantités)  
+✅ **3 Accès rapides** avec boutons vers les pages  
+✅ **Alertes péremption** (expirés + proche expiration)  
+✅ **Derniers articles ajoutés** (5 derniers)  
+✅ **Design moderne** avec Tailwind CSS  
+✅ **Navigation** vers toutes les pages  
+✅ **Rafraîchissement** des données  
+
+---
+
+## 🌐 Navigation Complète
+
+Votre site web a maintenant :
+```
+http://192.168.1.200:8000/web/
+├── index.html         → Dashboard avec stats
+├── produits.html      → Gestion produits
+├── emplacements.html  → Gestion emplacements (nouvelle page)
+└── articles.html      → Gestion articles (à créer)

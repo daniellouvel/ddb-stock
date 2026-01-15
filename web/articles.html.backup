@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Articles - DDB-Stock</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold">🏠 DDB-Stock</h1>
+                    <p class="text-blue-200">Gestion des Articles</p>
+                </div>
+                <nav class="space-x-4">
+                    <a href="index.html" class="hover:text-blue-200">Dashboard</a>
+                    <a href="produits.html" class="hover:text-blue-200">Produits</a>
+                    <a href="emplacements.html" class="hover:text-blue-200">Emplacements</a>
+                    <a href="articles.html" class="text-white font-bold">Articles</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Formulaire Ajout/Modification -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold mb-4 text-gray-800" id="formTitle">➕ Ajouter un Article</h2>
+                
+                <form id="formArticle" class="space-y-4">
+                    <input type="hidden" id="article_id" value="">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Code Article *
+                        </label>
+                        <input type="text" id="code_article" 
+                               pattern="GG[0-9]{4}" 
+                               placeholder="GG0001" 
+                               required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">Format: GG#### (ex: GG0001)</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Produit *
+                        </label>
+                        <select id="produit_id" 
+                                required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">-- Sélectionner un produit --</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Emplacement *
+                        </label>
+                        <select id="emplacement_id" 
+                                required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">-- Sélectionner un emplacement --</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Quantité *
+                        </label>
+                        <input type="number" id="quantite" 
+                               min="0" 
+                               value="1"
+                               required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Date de Péremption (optionnel)
+                        </label>
+                        <input type="date" id="date_peremption" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">Pour les denrées alimentaires uniquement</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Commentaire
+                        </label>
+                        <textarea id="commentaire" 
+                                  rows="3" 
+                                  placeholder="Notes, remarques, état de l'article..."
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button type="submit" 
+                                id="btnSubmit"
+                                class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition">
+                            ➕ Ajouter
+                        </button>
+                        <button type="button" 
+                                onclick="annulerModification()"
+                                id="btnAnnuler"
+                                class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition">
+                            Annuler
+                        </button>
+                    </div>
+                </form>
+
+                <div id="message" class="mt-4 hidden"></div>
+            </div>
+
+            <!-- Liste des Articles -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">🏷️ Liste des Articles</h2>
+                    <button onclick="chargerArticles()" 
+                            class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition text-sm">
+                        🔄 Rafraîchir
+                    </button>
+                </div>
+
+                <div class="mb-4 space-y-2">
+                    <input type="text" 
+                           id="searchInput" 
+                           placeholder="🔍 Rechercher un article..."
+                           onkeyup="filtrerArticles()"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    
+                    <div class="flex gap-2 flex-wrap">
+                        <select id="filtreEmplacement" 
+                                onchange="filtrerArticles()"
+                                class="text-sm px-3 py-1 border border-gray-300 rounded">
+                            <option value="">Tous les emplacements</option>
+                        </select>
+                        
+                        <button onclick="filtrerParPeremption('proche')" 
+                                class="text-sm px-3 py-1 bg-orange-200 rounded hover:bg-orange-300 transition">
+                            ⚠️ Péremption proche
+                        </button>
+                        <button onclick="filtrerParPeremption('expire')" 
+                                class="text-sm px-3 py-1 bg-red-200 rounded hover:bg-red-300 transition">
+                            🚨 Expirés
+                        </button>
+                        <button onclick="filtrerParPeremption('tous')" 
+                                class="text-sm px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition">
+                            Tous
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-sm text-gray-600 mb-2">
+                    <span id="compteur">-</span> article(s) • <span id="quantiteTotale">-</span> unité(s)
+                </div>
+
+                <div id="listeArticles" class="space-y-2 max-h-[600px] overflow-y-auto">
+                    <div class="text-center text-gray-500 py-8">
+                        Chargement...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://' + window.location.hostname + ':8000';
+        let articles = [];
+        let articlesAffiches = [];
+        let produits = [];
+        let emplacements = [];
+        let modeModification = false;
+
+        // Charger au démarrage
+        window.onload = function() {
+            chargerDonnees();
+        };
+
+        // Charger toutes les données
+        async function chargerDonnees() {
+            try {
+                // Charger produits, emplacements et articles en parallèle
+                const [resProduits, resEmplacements, resArticles] = await Promise.all([
+                    fetch(`${API_URL}/produits/`),
+                    fetch(`${API_URL}/emplacements/`),
+                    fetch(`${API_URL}/articles/`)
+                ]);
+
+                produits = await resProduits.json();
+                emplacements = await resEmplacements.json();
+                articles = await resArticles.json();
+                articlesAffiches = [...articles];
+
+                chargerOptionsProduits();
+                chargerOptionsEmplacements();
+                chargerFiltreEmplacements();
+                afficherArticles();
+                mettreAJourCompteurs();
+            } catch (error) {
+                document.getElementById('listeArticles').innerHTML = 
+                    '<div class="text-red-600 text-center py-4">❌ Erreur de chargement</div>';
+                console.error('Erreur:', error);
+            }
+        }
+
+        // Charger uniquement les articles
+        async function chargerArticles() {
+            try {
+                const response = await fetch(`${API_URL}/articles/`);
+                articles = await response.json();
+                articlesAffiches = [...articles];
+                
+                afficherArticles();
+                mettreAJourCompteurs();
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        }
+
+        // Charger les options produits
+        function chargerOptionsProduits() {
+            const select = document.getElementById('produit_id');
+            select.innerHTML = '<option value="">-- Sélectionner un produit --</option>';
+            
+            produits.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.id;
+                option.textContent = `${p.nom}${p.marque ? ` (${p.marque})` : ''}`;
+                select.appendChild(option);
+            });
+        }
+
+        // Charger les options emplacements AVEC HIÉRARCHIE
+        function chargerOptionsEmplacements() {
+            const select = document.getElementById('emplacement_id');
+            select.innerHTML = '<option value="">-- Sélectionner un emplacement --</option>';
+            
+            // Fonction récursive pour afficher la hiérarchie
+            function ajouterEmplacementRecursif(emplacement, profondeur) {
+                const option = document.createElement('option');
+                option.value = emplacement.id;
+                
+                // Indentation visuelle avec tirets
+                const indent = '—'.repeat(profondeur);
+                const prefix = profondeur > 0 ? ' ' : '';
+                
+                option.textContent = `${indent}${prefix}${emplacement.nom} (${emplacement.code_emplacement})`;
+                select.appendChild(option);
+                
+                // Ajouter les enfants
+                const enfants = emplacements.filter(e => e.parent_id === emplacement.id);
+                enfants.forEach(enfant => {
+                    ajouterEmplacementRecursif(enfant, profondeur + 1);
+                });
+            }
+            
+            // Commencer par les emplacements racine (sans parent)
+            const racines = emplacements.filter(e => !e.parent_id);
+            racines.forEach(racine => {
+                ajouterEmplacementRecursif(racine, 0);
+            });
+        }
+
+        // Charger le filtre emplacements AVEC HIÉRARCHIE
+        function chargerFiltreEmplacements() {
+            const select = document.getElementById('filtreEmplacement');
+            select.innerHTML = '<option value="">Tous les emplacements</option>';
+            
+            // Fonction récursive pour afficher la hiérarchie
+            function ajouterEmplacementRecursif(emplacement, profondeur) {
+                const option = document.createElement('option');
+                option.value = emplacement.id;
+                
+                // Indentation visuelle avec tirets
+                const indent = '—'.repeat(profondeur);
+                const prefix = profondeur > 0 ? ' ' : '';
+                
+                option.textContent = `${indent}${prefix}${emplacement.nom} (${emplacement.code_emplacement})`;
+                select.appendChild(option);
+                
+                // Ajouter les enfants
+                const enfants = emplacements.filter(e => e.parent_id === emplacement.id);
+                enfants.forEach(enfant => {
+                    ajouterEmplacementRecursif(enfant, profondeur + 1);
+                });
+            }
+            
+            // Commencer par les racines
+            const racines = emplacements.filter(e => !e.parent_id);
+            racines.forEach(racine => {
+                ajouterEmplacementRecursif(racine, 0);
+            });
+        }
+
+        // Afficher les articles
+        function afficherArticles() {
+            const container = document.getElementById('listeArticles');
+            
+            if (articlesAffiches.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-8">Aucun article trouvé</div>';
+                return;
+            }
+
+            // Créer des maps pour recherche rapide
+            const produitsMap = {};
+            produits.forEach(p => produitsMap[p.id] = p);
+            
+            const emplacementsMap = {};
+            emplacements.forEach(e => emplacementsMap[e.id] = e);
+
+            let html = '';
+            articlesAffiches.forEach(article => {
+                const produit = produitsMap[article.produit_id] || {nom: 'Inconnu'};
+                const emplacement = emplacementsMap[article.emplacement_id] || {nom: 'Inconnu', code_emplacement: '-'};
+                
+                // Vérifier péremption
+                let alertePeremption = '';
+                if (article.date_peremption) {
+                    const datePeremption = new Date(article.date_peremption);
+                    const maintenant = new Date();
+                    const joursRestants = Math.ceil((datePeremption - maintenant) / (1000 * 60 * 60 * 24));
+                    
+                    if (joursRestants < 0) {
+                        alertePeremption = '<span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">🚨 PÉRIMÉ</span>';
+                    } else if (joursRestants <= 30) {
+                        alertePeremption = `<span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">⚠️ ${joursRestants}j restants</span>`;
+                    }
+                }
+                
+                html += `
+                    <div class="border border-gray-200 rounded-md p-4 hover:bg-gray-50 transition article-item"
+                         data-code="${article.code_article.toLowerCase()}"
+                         data-produit="${produit.nom.toLowerCase()}"
+                         data-emplacement-id="${article.emplacement_id}">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-blue-600">${article.code_article}</span>
+                                    ${alertePeremption}
+                                </div>
+                                <div class="text-gray-800 font-semibold mt-1">
+                                    📦 ${produit.nom}${produit.marque ? ` (${produit.marque})` : ''}
+                                </div>
+                                <div class="text-sm text-gray-600 mt-1">
+                                    📍 ${emplacement.nom} <span class="text-gray-400">(${emplacement.code_emplacement})</span>
+                                </div>
+                                <div class="flex gap-3 mt-2 text-sm">
+                                    <span class="text-gray-600">
+                                        <strong>Quantité:</strong> ${article.quantite}
+                                    </span>
+                                    ${article.date_peremption ? 
+                                        `<span class="text-gray-600">
+                                            <strong>Péremption:</strong> ${new Date(article.date_peremption).toLocaleDateString('fr-FR')}
+                                        </span>` : 
+                                        ''}
+                                </div>
+                                ${article.commentaire ? 
+                                    `<div class="text-sm text-gray-500 italic mt-2">
+                                        💬 ${article.commentaire}
+                                    </div>` : 
+                                    ''}
+                            </div>
+                            <div class="flex flex-col gap-2 ml-4">
+                                <button onclick='modifierArticle(${JSON.stringify(article).replace(/'/g, "&#39;")})' 
+                                        class="text-blue-600 hover:text-blue-800 px-3 py-1 border border-blue-600 rounded hover:bg-blue-50 transition text-sm whitespace-nowrap">
+                                    ✏️ Modifier
+                                </button>
+                                <button onclick="ajusterQuantite(${article.id}, ${article.quantite})" 
+                                        class="text-green-600 hover:text-green-800 px-3 py-1 border border-green-600 rounded hover:bg-green-50 transition text-sm whitespace-nowrap">
+                                    📊 Quantité
+                                </button>
+                                <button onclick="supprimerArticle(${article.id}, '${article.code_article}')" 
+                                        class="text-red-600 hover:text-red-800 px-3 py-1 border border-red-600 rounded hover:bg-red-50 transition text-sm whitespace-nowrap">
+                                    🗑️ Supprimer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Ajouter ou modifier un article
+        document.getElementById('formArticle').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('article_id').value;
+            
+            // CORRECTION : Formater correctement la date
+            const dateInput = document.getElementById('date_peremption').value;
+            let datePeremption = null;
+            if (dateInput) {
+                // Convertir au format ISO 8601 avec timezone UTC
+                datePeremption = dateInput + 'T00:00:00Z';
+            }
+            
+            const data = {
+                code_article: document.getElementById('code_article').value,
+                produit_id: parseInt(document.getElementById('produit_id').value),
+                emplacement_id: parseInt(document.getElementById('emplacement_id').value),
+                quantite: parseInt(document.getElementById('quantite').value),
+                date_peremption: datePeremption,
+                commentaire: document.getElementById('commentaire').value || null
+            };
+
+            try {
+                let response;
+                if (modeModification && id) {
+                    // Modification
+                    response = await fetch(`${API_URL}/articles/${id}`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    // Ajout
+                    response = await fetch(`${API_URL}/articles/`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                }
+
+                const messageDiv = document.getElementById('message');
+
+                if (response.ok) {
+                    messageDiv.className = 'mt-4 p-3 bg-green-100 text-green-800 rounded-md';
+                    messageDiv.textContent = modeModification ? 
+                        '✅ Article modifié avec succès' : 
+                        '✅ Article ajouté avec succès';
+                    messageDiv.classList.remove('hidden');
+                    
+                    annulerModification();
+                    chargerArticles();
+
+                    setTimeout(() => messageDiv.classList.add('hidden'), 3000);
+                } else {
+                    const error = await response.json();
+                    messageDiv.className = 'mt-4 p-3 bg-red-100 text-red-800 rounded-md';
+                    messageDiv.textContent = '❌ Erreur: ' + error.detail;
+                    messageDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                const messageDiv = document.getElementById('message');
+                messageDiv.className = 'mt-4 p-3 bg-red-100 text-red-800 rounded-md';
+                messageDiv.textContent = '❌ Erreur de connexion à l\'API: ' + error.message;
+                messageDiv.classList.remove('hidden');
+                console.error('Erreur:', error);
+            }
+        });
+
+        // Modifier un article
+        function modifierArticle(article) {
+            modeModification = true;
+            
+            document.getElementById('article_id').value = article.id;
+            document.getElementById('code_article').value = article.code_article;
+            document.getElementById('produit_id').value = article.produit_id;
+            document.getElementById('emplacement_id').value = article.emplacement_id;
+            document.getElementById('quantite').value = article.quantite;
+            document.getElementById('date_peremption').value = article.date_peremption ? article.date_peremption.split('T')[0] : '';
+            document.getElementById('commentaire').value = article.commentaire || '';
+            
+            document.getElementById('formTitle').textContent = '✏️ Modifier l\'Article';
+            document.getElementById('btnSubmit').textContent = '💾 Enregistrer';
+            document.getElementById('btnSubmit').className = 'flex-1 bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition';
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Annuler modification
+        function annulerModification() {
+            modeModification = false;
+            
+            document.getElementById('formArticle').reset();
+            document.getElementById('article_id').value = '';
+            document.getElementById('message').classList.add('hidden');
+            
+            document.getElementById('formTitle').textContent = '➕ Ajouter un Article';
+            document.getElementById('btnSubmit').textContent = '➕ Ajouter';
+            document.getElementById('btnSubmit').className = 'flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition';
+        }
+
+        // Ajuster la quantité
+        async function ajusterQuantite(id, quantiteActuelle) {
+            const nouvelleQuantite = prompt(`Quantité actuelle: ${quantiteActuelle}\n\nNouvelle quantité:`, quantiteActuelle);
+            
+            if (nouvelleQuantite === null || nouvelleQuantite === '') return;
+            
+            const qte = parseInt(nouvelleQuantite);
+            if (isNaN(qte) || qte < 0) {
+                alert('❌ Quantité invalide');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/articles/${id}/quantite?quantite=${qte}`, {
+                    method: 'PATCH'
+                });
+
+                if (response.ok) {
+                    alert('✅ Quantité mise à jour');
+                    chargerArticles();
+                } else {
+                    const error = await response.json();
+                    alert('❌ Erreur: ' + error.detail);
+                }
+            } catch (error) {
+                alert('❌ Erreur de connexion');
+                console.error(error);
+            }
+        }
+
+        // Supprimer un article
+        async function supprimerArticle(id, code) {
+            if (!confirm(`Voulez-vous vraiment supprimer l'article "${code}" ?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/articles/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('✅ Article supprimé');
+                    chargerArticles();
+                } else {
+                    const error = await response.json();
+                    alert('❌ Erreur: ' + error.detail);
+                }
+            } catch (error) {
+                alert('❌ Erreur de connexion');
+                console.error(error);
+            }
+        }
+
+        // Filtrer les articles
+        function filtrerArticles() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const emplacementFiltre = document.getElementById('filtreEmplacement').value;
+            
+            articlesAffiches = articles.filter(article => {
+                const produit = produits.find(p => p.id === article.produit_id) || {nom: ''};
+                
+                const matchSearch = search === '' || 
+                    article.code_article.toLowerCase().includes(search) ||
+                    produit.nom.toLowerCase().includes(search) ||
+                    (article.commentaire && article.commentaire.toLowerCase().includes(search));
+                
+                const matchEmplacement = emplacementFiltre === '' || 
+                    article.emplacement_id === parseInt(emplacementFiltre);
+                
+                return matchSearch && matchEmplacement;
+            });
+            
+            afficherArticles();
+            mettreAJourCompteurs();
+        }
+
+        // Filtrer par péremption
+        async function filtrerParPeremption(type) {
+            try {
+                if (type === 'proche') {
+                    const response = await fetch(`${API_URL}/articles/peremption/prochaines?jours=30`);
+                    articlesAffiches = await response.json();
+                } else if (type === 'expire') {
+                    const response = await fetch(`${API_URL}/articles/peremption/expirees`);
+                    articlesAffiches = await response.json();
+                } else {
+                    articlesAffiches = [...articles];
+                }
+                
+                afficherArticles();
+                mettreAJourCompteurs();
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        }
+
+        // Mettre à jour les compteurs
+        function mettreAJourCompteurs() {
+            const total = articles.length;
+            const affiches = articlesAffiches.length;
+            
+            if (total === affiches) {
+                document.getElementById('compteur').textContent = total;
+            } else {
+                document.getElementById('compteur').textContent = `${affiches} / ${total}`;
+            }
+            
+            const quantiteTotale = articlesAffiches.reduce((sum, art) => sum + art.quantite, 0);
+            document.getElementById('quantiteTotale').textContent = quantiteTotale;
+        }
+    </script>
+</body>
+</html>
+```
+
+---
+
+## ✅ Sauvegarder et Tester
+
+1. **Sauvegardez** : `Ctrl+X`, `Y`, `Enter`
+2. **Videz le cache** : `Ctrl+Shift+R`
+3. **Rechargez la page**
+
+---
+
+## 📊 Résultat Attendu
+
+**Dropdown "Emplacement"** affichera maintenant :
+```
+-- Sélectionner un emplacement --
+Maison (EMP001)
+— Garage (EMP002)
+—— Étagère 1 (EMP005)
+—— Étagère 2 (EMP006)
+Armoire 1 (EMP003)
+Armoire 2 (EMP004)
+— Étagère 1 (EMP007)

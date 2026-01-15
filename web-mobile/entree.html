@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entrée Stock - DDB-Stock</title>
+    <title>Entrée Stock - DDB-Stock Mobile</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 min-h-screen">
     
-    <header class="bg-green-600 text-white shadow-lg">
+    <header class="bg-green-600 text-white shadow-lg sticky top-0 z-50">
         <div class="container mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
                 <div>
-                    <h1 class="text-2xl font-bold">📥 Entrée Stock</h1>
-                    <p class="text-green-200">Ajouter des articles au stock</p>
+                    <h1 class="text-xl font-bold">📥 Entrée Stock</h1>
+                    <p class="text-green-200 text-sm">Ajouter des articles</p>
                 </div>
-                <a href="home.html" class="bg-white text-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition">
+                <a href="home.html" class="bg-white text-green-600 px-3 py-2 rounded-lg text-sm font-medium">
                     ← Retour
                 </a>
             </div>
@@ -24,58 +24,112 @@
 
     <div class="container mx-auto px-4 py-8">
         
-        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+        <div class="bg-white rounded-xl shadow-lg p-6 max-w-2xl mx-auto">
             
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">➕ Ajouter un Article</h2>
+            <h2 class="text-xl font-bold text-gray-800 mb-6">➕ Nouvel Article</h2>
             
-            <form id="formEntree" class="space-y-6">
+            <form id="formEntree" class="space-y-5">
                 
+                <!-- Scan EAN Produit (OPTIONNEL) -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Produit *
+                        📦 EAN Produit (optionnel)
                     </label>
-                    <select id="produit_id" required 
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                        <option value="">-- Sélectionner un produit --</option>
-                    </select>
+                    <div class="flex gap-2">
+                        <input type="text" id="ean_scan" placeholder="Scannez ou saisissez l'EAN"
+                               class="flex-1 px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <button type="button" onclick="rechercherEAN()" 
+                                class="bg-blue-500 text-white px-4 py-3 rounded-lg hover:bg-blue-600">
+                            🔍
+                        </button>
+                    </div>
+                    <div id="produit_info" class="mt-2 hidden p-3 bg-green-50 rounded-lg border border-green-200">
+                        <div class="text-green-800 font-medium text-sm" id="produit_nom"></div>
+                        <div class="text-green-600 text-xs" id="produit_details"></div>
+                    </div>
+                    <input type="hidden" id="produit_id">
+                    
+                    <!-- Formulaire création produit manuel -->
+                    <div id="form_produit_manuel" class="mt-3 hidden p-4 bg-yellow-50 border border-yellow-200 rounded-lg space-y-3">
+                        <div class="text-sm font-medium text-yellow-800 mb-2">➕ Créer un nouveau produit</div>
+                        
+                        <input type="text" id="nouveau_nom" placeholder="Nom du produit *" required
+                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg">
+                        
+                        <input type="text" id="nouveau_marque" placeholder="Marque"
+                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg">
+                        
+                        <textarea id="nouveau_description" placeholder="Description" rows="2"
+                                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"></textarea>
+                        
+                        <button type="button" onclick="creerProduit()" 
+                                class="w-full bg-yellow-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-yellow-700">
+                            ✅ Créer ce produit
+                        </button>
+                    </div>
+                    
+                    <button type="button" onclick="afficherFormulaireProduit()" id="btn_creer_produit"
+                            class="mt-2 text-sm text-blue-600 hover:underline">
+                        + Créer un produit manuellement
+                    </button>
                 </div>
 
+                <!-- Scan Code Article -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Emplacement *
+                        🏷️ Code Article (GGxxxx) *
                     </label>
-                    <select id="emplacement_id" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                        <option value="">-- Sélectionner un emplacement --</option>
-                    </select>
+                    <input type="text" id="article_scan" placeholder="Ex: GG0001" required
+                           pattern="GG\d{4}" maxlength="6"
+                           class="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent uppercase">
+                    <div class="text-xs text-gray-500 mt-1">Format: GG0001, GG0042, etc.</div>
                 </div>
 
+                <!-- Scan Emplacement -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        📍 Code Emplacement (EMPxxx) *
+                    </label>
+                    <input type="text" id="emplacement_scan" placeholder="Ex: EMP001" required
+                           pattern="EMP\d{3}" maxlength="6"
+                           class="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent uppercase">
+                    <div id="emplacement_info" class="mt-2 hidden p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <div class="text-blue-800 font-medium text-sm" id="emplacement_nom"></div>
+                        <div class="text-blue-600 text-xs" id="emplacement_details"></div>
+                    </div>
+                    <input type="hidden" id="emplacement_id">
+                </div>
+
+                <!-- Quantité -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Quantité *
                     </label>
                     <input type="number" id="quantite" min="1" value="1" required
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                           class="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                 </div>
 
+                <!-- Date de Péremption -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Date de Péremption (optionnel)
+                        Date de Péremption
                     </label>
                     <input type="date" id="date_peremption"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                           class="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                 </div>
 
+                <!-- Commentaire -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Commentaire
                     </label>
-                    <textarea id="commentaire" rows="3" placeholder="Notes, remarques..."
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"></textarea>
+                    <textarea id="commentaire" rows="3" placeholder="Notes..."
+                              class="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"></textarea>
                 </div>
 
+                <!-- Bouton Valider -->
                 <button type="submit" 
-                        class="w-full bg-green-600 text-white py-4 rounded-lg text-lg font-bold hover:bg-green-700 transition">
+                        class="w-full bg-green-600 text-white py-4 rounded-lg text-lg font-bold active:bg-green-700 shadow-lg">
                     ✅ Valider l'Entrée
                 </button>
 
@@ -90,53 +144,278 @@
     <script>
         const API_URL = 'http://' + window.location.hostname + ':8000';
 
-        window.onload = function() {
-            chargerProduits();
-            chargerEmplacements();
-        };
+        // Recherche EAN sur plusieurs API
+        async function rechercherEAN() {
+            const ean = document.getElementById('ean_scan').value.trim();
+            if (!ean) {
+                afficherFormulaireProduit();
+                return;
+            }
 
-        async function chargerProduits() {
-            const response = await fetch(`${API_URL}/produits/`);
-            const produits = await response.json();
-            
-            const select = document.getElementById('produit_id');
-            produits.forEach(p => {
-                const option = document.createElement('option');
-                option.value = p.id;
-                option.textContent = `${p.nom}${p.marque ? ` (${p.marque})` : ''}`;
-                select.appendChild(option);
-            });
+            // Afficher un indicateur de chargement
+            const btn = event?.target;
+            if (btn) {
+                btn.textContent = '⏳';
+                btn.disabled = true;
+            }
+
+            try {
+                // 1. Chercher en base locale
+                const response = await fetch(`${API_URL}/produits/`);
+                const produits = await response.json();
+                const produit = produits.find(p => p.ean === ean);
+
+                if (produit) {
+                    afficherProduit(produit);
+                    if (btn) {
+                        btn.textContent = '🔍';
+                        btn.disabled = false;
+                    }
+                    return;
+                }
+
+                // 2. Chercher sur OpenFoodFacts (alimentaire)
+                let product = await chercherOpenFoodFacts(ean);
+                
+                // 3. Si pas trouvé, chercher sur Open EAN Database
+                if (!product) {
+                    product = await chercherOpenEAN(ean);
+                }
+
+                if (btn) {
+                    btn.textContent = '🔍';
+                    btn.disabled = false;
+                }
+
+                if (product) {
+                    if (confirm(`Produit trouvé :\n\n${product.nom}\nMarque : ${product.marque || 'Inconnue'}\n\nCréer ce produit automatiquement ?`)) {
+                        await creerProduitDepuisWeb(product, ean);
+                    } else {
+                        afficherFormulaireProduit();
+                    }
+                } else {
+                    alert(`❌ EAN ${ean} non trouvé sur le web.\n\nVous pouvez créer le produit manuellement.`);
+                    afficherFormulaireProduit();
+                }
+            } catch (error) {
+                if (btn) {
+                    btn.textContent = '🔍';
+                    btn.disabled = false;
+                }
+                console.error('Erreur recherche EAN:', error);
+                alert('❌ Erreur de recherche. Créez le produit manuellement.');
+                afficherFormulaireProduit();
+            }
         }
 
-        async function chargerEmplacements() {
-            const response = await fetch(`${API_URL}/emplacements/`);
-            const emplacements = await response.json();
-            
-            const select = document.getElementById('emplacement_id');
-            emplacements.forEach(e => {
-                const option = document.createElement('option');
-                option.value = e.id;
-                option.textContent = `${e.nom} (${e.code_emplacement})`;
-                select.appendChild(option);
-            });
+        // API 1: OpenFoodFacts (alimentaire)
+        async function chercherOpenFoodFacts(ean) {
+            try {
+                console.log('Recherche OpenFoodFacts...');
+                const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${ean}.json`);
+                const data = await response.json();
+                
+                if (data.status === 1 && data.product) {
+                    console.log('✅ Trouvé sur OpenFoodFacts');
+                    return {
+                        nom: data.product.product_name || 'Produit sans nom',
+                        marque: data.product.brands || null,
+                        description: data.product.categories || null
+                    };
+                }
+            } catch (error) {
+                console.log('OpenFoodFacts: erreur ou non trouvé', error);
+            }
+            return null;
         }
 
+        // API 2: Open EAN Database (tous produits)
+        async function chercherOpenEAN(ean) {
+            try {
+                console.log('Recherche OpenEAN...');
+                const response = await fetch(`https://opengtindb.org/?ean=${ean}&cmd=ean&queryid=400000000`);
+                const text = await response.text();
+                
+                // Parser la réponse (format texte délimité)
+                if (text && !text.includes('error=0')) {
+                    const lines = text.split('\n');
+                    const nomLine = lines.find(l => l.startsWith('name='));
+                    const vendorLine = lines.find(l => l.startsWith('vendor='));
+                    
+                    if (nomLine) {
+                        const nom = nomLine.split('=')[1]?.trim();
+                        const marque = vendorLine?.split('=')[1]?.trim();
+                        
+                        if (nom) {
+                            console.log('✅ Trouvé sur OpenEAN');
+                            return {
+                                nom: nom,
+                                marque: marque || null,
+                                description: null
+                            };
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('OpenEAN: erreur ou non trouvé', error);
+            }
+            return null;
+        }
+
+        // Créer produit depuis données web
+        async function creerProduitDepuisWeb(product, ean) {
+            const data = {
+                ean: ean,
+                nom: product.nom,
+                marque: product.marque,
+                description: product.description
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/produits/`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    const nouveauProduit = await response.json();
+                    afficherProduit(nouveauProduit);
+                    alert('✅ Produit créé automatiquement !');
+                } else {
+                    const error = await response.json();
+                    alert('❌ Erreur création produit: ' + error.detail);
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('❌ Erreur de connexion');
+            }
+        }
+
+        // Afficher formulaire création manuelle
+        function afficherFormulaireProduit() {
+            document.getElementById('form_produit_manuel').classList.remove('hidden');
+            document.getElementById('btn_creer_produit').classList.add('hidden');
+        }
+
+        // Créer produit manuellement
+        async function creerProduit() {
+            const nom = document.getElementById('nouveau_nom').value.trim();
+            if (!nom) {
+                alert('❌ Le nom est obligatoire');
+                return;
+            }
+
+            const data = {
+                ean: document.getElementById('ean_scan').value.trim() || null,
+                nom: nom,
+                marque: document.getElementById('nouveau_marque').value.trim() || null,
+                description: document.getElementById('nouveau_description').value.trim() || null
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/produits/`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    const nouveauProduit = await response.json();
+                    afficherProduit(nouveauProduit);
+                    document.getElementById('form_produit_manuel').classList.add('hidden');
+                    // Vider les champs
+                    document.getElementById('nouveau_nom').value = '';
+                    document.getElementById('nouveau_marque').value = '';
+                    document.getElementById('nouveau_description').value = '';
+                    alert('✅ Produit créé !');
+                } else {
+                    const error = await response.json();
+                    alert('❌ Erreur: ' + error.detail);
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('❌ Erreur de connexion');
+            }
+        }
+
+        // Afficher infos produit
+        function afficherProduit(produit) {
+            document.getElementById('produit_id').value = produit.id;
+            document.getElementById('produit_nom').textContent = produit.nom;
+            document.getElementById('produit_details').textContent = 
+                `${produit.marque || 'Sans marque'} ${produit.ean ? '- EAN: ' + produit.ean : ''}`;
+            document.getElementById('produit_info').classList.remove('hidden');
+            document.getElementById('form_produit_manuel').classList.add('hidden');
+            document.getElementById('btn_creer_produit').classList.add('hidden');
+        }
+
+        // Au blur de l'EAN
+        document.getElementById('ean_scan').addEventListener('blur', function() {
+            if (this.value.trim()) {
+                rechercherEAN();
+            }
+        });
+
+        // Recherche emplacement par code
+        document.getElementById('emplacement_scan').addEventListener('blur', async function() {
+            const code = this.value.trim().toUpperCase();
+            if (!code) return;
+
+            try {
+                const response = await fetch(`${API_URL}/emplacements/`);
+                const emplacements = await response.json();
+                const emplacement = emplacements.find(e => e.code_emplacement === code);
+
+                const infoDiv = document.getElementById('emplacement_info');
+                if (emplacement) {
+                    document.getElementById('emplacement_id').value = emplacement.id;
+                    document.getElementById('emplacement_nom').textContent = emplacement.nom;
+                    document.getElementById('emplacement_details').textContent = 
+                        `Code: ${emplacement.code_emplacement} - Niveau ${emplacement.niveau}`;
+                    infoDiv.classList.remove('hidden');
+                } else {
+                    alert(`❌ Aucun emplacement trouvé avec le code: ${code}`);
+                    this.value = '';
+                    this.focus();
+                }
+            } catch (error) {
+                console.error('Erreur recherche emplacement:', error);
+                alert('❌ Erreur de connexion');
+            }
+        });
+
+        // Forcer majuscules
+        document.getElementById('article_scan').addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+        });
+        document.getElementById('emplacement_scan').addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+        });
+
+        // Soumission
         document.getElementById('formEntree').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Générer code article automatiquement
-            const response = await fetch(`${API_URL}/articles/`);
-            const articles = await response.json();
-            const maxNum = articles.length > 0 
-                ? Math.max(...articles.map(a => parseInt(a.code_article.substring(2)))) 
-                : 0;
-            const codeArticle = `GG${String(maxNum + 1).padStart(4, '0')}`;
+            const produit_id = document.getElementById('produit_id').value;
+            const emplacement_id = document.getElementById('emplacement_id').value;
 
+            if (!produit_id) {
+                alert('❌ Veuillez scanner un EAN ou créer un produit');
+                return;
+            }
+            if (!emplacement_id) {
+                alert('❌ Veuillez scanner un emplacement valide');
+                return;
+            }
+
+            const codeArticle = document.getElementById('article_scan').value.toUpperCase();
             const dateInput = document.getElementById('date_peremption').value;
+
             const data = {
                 code_article: codeArticle,
-                produit_id: parseInt(document.getElementById('produit_id').value),
-                emplacement_id: parseInt(document.getElementById('emplacement_id').value),
+                produit_id: parseInt(produit_id),
+                emplacement_id: parseInt(emplacement_id),
                 quantite: parseInt(document.getElementById('quantite').value),
                 date_peremption: dateInput ? dateInput + 'T00:00:00Z' : null,
                 commentaire: document.getElementById('commentaire').value || null
@@ -151,12 +430,13 @@
 
                 const messageDiv = document.getElementById('message');
                 if (createResponse.ok) {
-                    messageDiv.className = 'mt-4 p-4 bg-green-100 text-green-800 rounded-lg';
+                    messageDiv.className = 'mt-4 p-4 bg-green-100 text-green-800 rounded-lg font-medium';
                     messageDiv.textContent = `✅ Article ${codeArticle} ajouté avec succès !`;
                     messageDiv.classList.remove('hidden');
                     
-                    document.getElementById('formEntree').reset();
-                    setTimeout(() => messageDiv.classList.add('hidden'), 3000);
+                    setTimeout(() => {
+                        window.location.href = 'home.html';
+                    }, 1500);
                 } else {
                     const error = await createResponse.json();
                     messageDiv.className = 'mt-4 p-4 bg-red-100 text-red-800 rounded-lg';
