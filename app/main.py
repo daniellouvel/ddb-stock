@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-
 from app.database import engine, Base
-from app.routers import produits, emplacements, articles
+from app.routers import produits, emplacements, articles, recherche_ean
 
 # Créer les tables
 Base.metadata.create_all(bind=engine)
@@ -28,6 +27,7 @@ app.add_middleware(
 app.include_router(produits.router)
 app.include_router(emplacements.router)
 app.include_router(articles.router)
+app.include_router(recherche_ean.router)
 
 # Servir fichiers statiques (frontend)
 app.mount("/web", StaticFiles(directory="/opt/ddb-stock/web", html=True), name="web")
@@ -43,7 +43,8 @@ def root():
         "endpoints": {
             "produits": "/produits",
             "emplacements": "/emplacements",
-            "articles": "/articles"
+            "articles": "/articles",
+            "recherche_ean": "/recherche-ean/{ean}"
         }
     }
 

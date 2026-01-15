@@ -70,10 +70,26 @@ class ArticleUpdate(BaseModel):
     date_peremption: Optional[datetime] = None
     commentaire: Optional[str] = None
 
+class ArticleResponse(ArticleBase):
+    id: int
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
 class Article(ArticleBase):
     id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
+
+class ArticleDetail(ArticleBase):
+    id: int
+    created_at: datetime
+    produit: Produit
+    emplacement: Emplacement
     
     class Config:
         from_attributes = True
