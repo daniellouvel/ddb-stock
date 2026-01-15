@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sortie Stock - DDB-Stock</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    
+    <header class="bg-red-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold">📤 Sortie Stock</h1>
+                    <p class="text-red-200">Retirer des articles du stock</p>
+                </div>
+                <a href="home.html" class="bg-white text-red-600 px-4 py-2 rounded-lg hover:bg-red-50 transition">
+                    ← Retour
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8">
+        
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+            
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">➖ Retirer un Article</h2>
+            
+            <form id="formSortie" class="space-y-6">
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Article à Retirer *
+                    </label>
+                    <select id="article_id" required onchange="afficherInfoArticle()"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                        <option value="">-- Sélectionner un article --</option>
+                    </select>
+                </div>
+
+                <div id="infoArticle" class="hidden bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-gray-800 mb-2">📋 Informations</h3>
+                    <div id="detailArticle" class="text-sm text-gray-700 space-y-1"></div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Quantité à Retirer *
+                    </label>
+                    <input type="number" id="quantite" min="1" value="1" required
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                    <p class="text-xs text-gray-500 mt-1">Quantité disponible: <span id="quantiteDisponible">-</span></p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Motif de Sortie
+                    </label>
+                    <select id="motif" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                        <option value="utilisation">Utilisation</option>
+                        <option value="vente">Vente</option>
+                        <option value="don">Don</option>
+                        <option value="perte">Perte/Casse</option>
+                        <option value="perime">Périmé</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Commentaire
+                    </label>
+                    <textarea id="commentaire" rows="3" placeholder="Précisions sur la sortie..."
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"></textarea>
+                </div>
+
+                <button type="submit" 
+                        class="w-full bg-red-600 text-white py-4 rounded-lg text-lg font-bold hover:bg-red-700 transition">
+                    ✅ Valider la Sortie
+                </button>
+
+            </form>
+
+            <div id="message" class="mt-4 hidden"></div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const API_URL = 'http://' + window.location.hostname + ':8000';
+        let articles = [];
+        let produits = [];
+        let emplacements = [];
+
+        window.onload = function() {
+            chargerDonnees();
+        };
+
+        async function chargerDonnees() {
+            try {
+                const [resArticles, resProduits, resEmplacements] = await Promise.all([
+                    fetch(`${API_URL}/articles/`),
+                    fetch(`${API_URL}/produits/`),
+                    fetch(`${API_URL}/emplacements/`)
+                ]);
+
+                articles = await resArticles.json();
+                produits = await resProduits.json();
+                emplacements = await resEmplacements.json();
+
+                chargerArticles();
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        }
+
+        function chargerArticles() {
+            const select = document.getElementById('article_id');
+            select.innerHTML = '<option value="">-- Sélectionner un article --</option>';
+            
+            articles.forEach(article => {
+                const produit = produits.find(p => p.id === article.produit_id);
+                const emplacement = emplacements.find(e => e.id === article.emplacement_id);
+                
+                if (article.quantite > 0) {
+                    const option = document.createElement('option');
+                    option.value = article.id;
+                    option.textContent = `${article.code_article} - ${produit?.nom || 'Inconnu'} (${article.quantite} dispo) - ${emplacement?.nom || 'Inconnu'}`;
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        function afficherInfoArticle() {
+            const articleId = parseInt(document.getElementById('article_id').value);
+            if (!articleId) {
+                document.getElementById('infoArticle').classList.add('hidden');
+                return;
+            }
+
+            const article = articles.find(a => a.id === articleId);
+            const produit = produits.find(p => p.id === article.produit_id);
+            const emplacement = emplacements.find(e => e.id === article.emplacement_id);
+
+            document.getElementById('quantiteDisponible').textContent = article.quantite;
+            document.getElementById('quantite').max = article.quantite;
+
+            let html = `
+                <div><strong>Code:</strong> ${article.code_article}</div>
+                <div><strong>Produit:</strong> ${produit?.nom || 'Inconnu'}</div>
+                <div><strong>Emplacement:</strong> ${emplacement?.nom || 'Inconnu'}</div>
+                <div><strong>Quantité disponible:</strong> ${article.quantite}</div>
+            `;
+
+            if (article.date_peremption) {
+                html += `<div><strong>Péremption:</strong> ${new Date(article.date_peremption).toLocaleDateString('fr-FR')}</div>`;
+            }
+
+            document.getElementById('detailArticle').innerHTML = html;
+            document.getElementById('infoArticle').classList.remove('hidden');
+        }
+
+        document.getElementById('formSortie').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const articleId = parseInt(document.getElementById('article_id').value);
+            const article = articles.find(a => a.id === articleId);
+            const quantiteRetrait = parseInt(document.getElementById('quantite').value);
+
+            if (quantiteRetrait > article.quantite) {
+                alert(`❌ Quantité insuffisante ! (${article.quantite} disponible)`);
+                return;
+            }
+
+            const nouvelleQuantite = article.quantite - quantiteRetrait;
+
+            try {
+                const response = await fetch(`${API_URL}/articles/${articleId}/quantite?quantite=${nouvelleQuantite}`, {
+                    method: 'PATCH'
+                });
+
+                const messageDiv = document.getElementById('message');
+                if (response.ok) {
+                    messageDiv.className = 'mt-4 p-4 bg-green-100 text-green-800 rounded-lg';
+                    messageDiv.textContent = `✅ Sortie validée ! ${quantiteRetrait} unité(s) retirée(s). Reste: ${nouvelleQuantite}`;
+                    messageDiv.classList.remove('hidden');
+                    
+                    document.getElementById('formSortie').reset();
+                    document.getElementById('infoArticle').classList.add('hidden');
+                    
+                    // Recharger les données
+                    await chargerDonnees();
+                    
+                    setTimeout(() => messageDiv.classList.add('hidden'), 3000);
+                } else {
+                    const error = await response.json();
+                    messageDiv.className = 'mt-4 p-4 bg-red-100 text-red-800 rounded-lg';
+                    messageDiv.textContent = '❌ Erreur: ' + error.detail;
+                    messageDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                alert('❌ Erreur de connexion');
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>

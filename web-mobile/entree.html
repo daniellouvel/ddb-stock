@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrée Stock - DDB-Stock</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    
+    <header class="bg-green-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold">📥 Entrée Stock</h1>
+                    <p class="text-green-200">Ajouter des articles au stock</p>
+                </div>
+                <a href="home.html" class="bg-white text-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition">
+                    ← Retour
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8">
+        
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+            
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">➕ Ajouter un Article</h2>
+            
+            <form id="formEntree" class="space-y-6">
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Produit *
+                    </label>
+                    <select id="produit_id" required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <option value="">-- Sélectionner un produit --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Emplacement *
+                    </label>
+                    <select id="emplacement_id" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <option value="">-- Sélectionner un emplacement --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Quantité *
+                    </label>
+                    <input type="number" id="quantite" min="1" value="1" required
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Date de Péremption (optionnel)
+                    </label>
+                    <input type="date" id="date_peremption"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Commentaire
+                    </label>
+                    <textarea id="commentaire" rows="3" placeholder="Notes, remarques..."
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"></textarea>
+                </div>
+
+                <button type="submit" 
+                        class="w-full bg-green-600 text-white py-4 rounded-lg text-lg font-bold hover:bg-green-700 transition">
+                    ✅ Valider l'Entrée
+                </button>
+
+            </form>
+
+            <div id="message" class="mt-4 hidden"></div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const API_URL = 'http://' + window.location.hostname + ':8000';
+
+        window.onload = function() {
+            chargerProduits();
+            chargerEmplacements();
+        };
+
+        async function chargerProduits() {
+            const response = await fetch(`${API_URL}/produits/`);
+            const produits = await response.json();
+            
+            const select = document.getElementById('produit_id');
+            produits.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.id;
+                option.textContent = `${p.nom}${p.marque ? ` (${p.marque})` : ''}`;
+                select.appendChild(option);
+            });
+        }
+
+        async function chargerEmplacements() {
+            const response = await fetch(`${API_URL}/emplacements/`);
+            const emplacements = await response.json();
+            
+            const select = document.getElementById('emplacement_id');
+            emplacements.forEach(e => {
+                const option = document.createElement('option');
+                option.value = e.id;
+                option.textContent = `${e.nom} (${e.code_emplacement})`;
+                select.appendChild(option);
+            });
+        }
+
+        document.getElementById('formEntree').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Générer code article automatiquement
+            const response = await fetch(`${API_URL}/articles/`);
+            const articles = await response.json();
+            const maxNum = articles.length > 0 
+                ? Math.max(...articles.map(a => parseInt(a.code_article.substring(2)))) 
+                : 0;
+            const codeArticle = `GG${String(maxNum + 1).padStart(4, '0')}`;
+
+            const dateInput = document.getElementById('date_peremption').value;
+            const data = {
+                code_article: codeArticle,
+                produit_id: parseInt(document.getElementById('produit_id').value),
+                emplacement_id: parseInt(document.getElementById('emplacement_id').value),
+                quantite: parseInt(document.getElementById('quantite').value),
+                date_peremption: dateInput ? dateInput + 'T00:00:00Z' : null,
+                commentaire: document.getElementById('commentaire').value || null
+            };
+
+            try {
+                const createResponse = await fetch(`${API_URL}/articles/`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                const messageDiv = document.getElementById('message');
+                if (createResponse.ok) {
+                    messageDiv.className = 'mt-4 p-4 bg-green-100 text-green-800 rounded-lg';
+                    messageDiv.textContent = `✅ Article ${codeArticle} ajouté avec succès !`;
+                    messageDiv.classList.remove('hidden');
+                    
+                    document.getElementById('formEntree').reset();
+                    setTimeout(() => messageDiv.classList.add('hidden'), 3000);
+                } else {
+                    const error = await createResponse.json();
+                    messageDiv.className = 'mt-4 p-4 bg-red-100 text-red-800 rounded-lg';
+                    messageDiv.textContent = '❌ Erreur: ' + error.detail;
+                    messageDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                alert('❌ Erreur de connexion');
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>

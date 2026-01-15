@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDB-Stock - Accueil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .action-button {
+            transition: all 0.3s ease;
+        }
+        .action-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .action-button:active {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    
+    <!-- Header Simple -->
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">🏠 DDB-Stock</h1>
+                    <p class="text-sm text-gray-600">Gestion d'Inventaire</p>
+                </div>
+                <a href="index.html" class="text-blue-600 hover:text-blue-800 text-sm">
+                    📊 Dashboard
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenu Principal -->
+    <div class="container mx-auto px-4 py-12">
+        
+        <!-- Titre Central -->
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-800 mb-2">Bienvenue</h2>
+            <p class="text-gray-600 text-lg">Que souhaitez-vous faire ?</p>
+        </div>
+
+        <!-- Boutons d'Action -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            
+            <!-- Bouton ENTRÉE -->
+            <a href="entree.html" class="action-button block">
+                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-12 text-center shadow-xl hover:shadow-2xl cursor-pointer">
+                    <div class="text-white">
+                        <div class="text-7xl mb-4">📥</div>
+                        <h3 class="text-3xl font-bold mb-2">ENTRÉE</h3>
+                        <p class="text-green-100 text-lg">
+                            Ajouter des articles<br>au stock
+                        </p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Bouton SORTIE -->
+            <a href="sortie.html" class="action-button block">
+                <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-12 text-center shadow-xl hover:shadow-2xl cursor-pointer">
+                    <div class="text-white">
+                        <div class="text-7xl mb-4">📤</div>
+                        <h3 class="text-3xl font-bold mb-2">SORTIE</h3>
+                        <p class="text-red-100 text-lg">
+                            Retirer des articles<br>du stock
+                        </p>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+
+        <!-- Stats Rapides -->
+        <div class="mt-16 max-w-4xl mx-auto">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">📊 Statistiques Rapides</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    
+                    <div class="text-center p-4">
+                        <div class="text-3xl font-bold text-blue-600" id="totalProduits">-</div>
+                        <div class="text-sm text-gray-600">Produits</div>
+                    </div>
+                    
+                    <div class="text-center p-4">
+                        <div class="text-3xl font-bold text-green-600" id="totalEmplacements">-</div>
+                        <div class="text-sm text-gray-600">Emplacements</div>
+                    </div>
+                    
+                    <div class="text-center p-4">
+                        <div class="text-3xl font-bold text-purple-600" id="totalArticles">-</div>
+                        <div class="text-sm text-gray-600">Articles</div>
+                    </div>
+                    
+                    <div class="text-center p-4">
+                        <div class="text-3xl font-bold text-orange-600" id="articlesAlerte">-</div>
+                        <div class="text-sm text-gray-600">Alertes</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Accès Rapides -->
+        <div class="mt-8 max-w-4xl mx-auto">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">🔗 Accès Rapides</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    
+                    <a href="produits.html" class="text-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
+                        <div class="text-3xl mb-2">📦</div>
+                        <div class="text-sm font-medium text-gray-700">Produits</div>
+                    </a>
+                    
+                    <a href="emplacements.html" class="text-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition">
+                        <div class="text-3xl mb-2">📍</div>
+                        <div class="text-sm font-medium text-gray-700">Emplacements</div>
+                    </a>
+                    
+                    <a href="articles.html" class="text-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition">
+                        <div class="text-3xl mb-2">🏷️</div>
+                        <div class="text-sm font-medium text-gray-700">Articles</div>
+                    </a>
+                    
+                    <a href="index.html" class="text-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition">
+                        <div class="text-3xl mb-2">📊</div>
+                        <div class="text-sm font-medium text-gray-700">Dashboard</div>
+                    </a>
+                    
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-8 text-gray-600 text-sm">
+        <p>DDB-Stock v2 - Système de Gestion d'Inventaire</p>
+    </footer>
+
+    <script>
+        const API_URL = 'http://' + window.location.hostname + ':8000';
+
+        // Charger les stats au démarrage
+        window.onload = function() {
+            chargerStats();
+        };
+
+        // Charger les statistiques
+        async function chargerStats() {
+            try {
+                const [resProduits, resEmplacements, resArticles] = await Promise.all([
+                    fetch(`${API_URL}/produits/`),
+                    fetch(`${API_URL}/emplacements/`),
+                    fetch(`${API_URL}/articles/`)
+                ]);
+
+                const produits = await resProduits.json();
+                const emplacements = await resEmplacements.json();
+                const articles = await resArticles.json();
+
+                // Calculer alertes péremption
+                const maintenant = new Date();
+                const articlesAlerte = articles.filter(article => {
+                    if (!article.date_peremption) return false;
+                    const datePeremption = new Date(article.date_peremption);
+                    const joursRestants = Math.ceil((datePeremption - maintenant) / (1000 * 60 * 60 * 24));
+                    return joursRestants <= 30; // Alerte si péremption dans 30 jours
+                }).length;
+
+                // Afficher les stats
+                document.getElementById('totalProduits').textContent = produits.length;
+                document.getElementById('totalEmplacements').textContent = emplacements.length;
+                document.getElementById('totalArticles').textContent = articles.length;
+                document.getElementById('articlesAlerte').textContent = articlesAlerte;
+
+            } catch (error) {
+                console.error('Erreur chargement stats:', error);
+            }
+        }
+    </script>
+</body>
+</html>
