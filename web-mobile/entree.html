@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entrée Stock - DDB-Stock Mobile</title>
+    <title>Entrée Stock - DDB-Stock</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -22,408 +22,256 @@
         </div>
     </header>
 
-    <div class="container mx-auto px-4 py-8">
-        
-        <div class="bg-white rounded-xl shadow-lg p-6 max-w-2xl mx-auto">
-            
-            <h2 class="text-xl font-bold text-gray-800 mb-6">➕ Nouvel Article</h2>
-            
-            <form id="formEntree" class="space-y-5">
+
+    <div class="container mx-auto px-4 py-6 max-w-2xl">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <form id="formEntree" class="space-y-4">
                 
-                <!-- Scan EAN Produit (OPTIONNEL) -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        📦 EAN Produit (optionnel)
+                    <label class="block text-lg font-medium text-gray-700 mb-2">
+                        Code-barres EAN *
                     </label>
-                    <div class="flex gap-2">
-                        <input type="text" id="ean_scan" placeholder="Scannez ou saisissez l'EAN"
-                               class="flex-1 px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                        <button type="button" onclick="rechercherEAN()" 
-                                class="bg-blue-500 text-white px-4 py-3 rounded-lg hover:bg-blue-600">
-                            🔍
-                        </button>
-                    </div>
-                    <div id="produit_info" class="mt-2 hidden p-3 bg-green-50 rounded-lg border border-green-200">
-                        <div class="text-green-800 font-medium text-sm" id="produit_nom"></div>
-                        <div class="text-green-600 text-xs" id="produit_details"></div>
-                    </div>
-                    <input type="hidden" id="produit_id">
-                    
-                    <!-- Formulaire création produit manuel -->
-                    <div id="form_produit_manuel" class="mt-3 hidden p-4 bg-yellow-50 border border-yellow-200 rounded-lg space-y-3">
-                        <div class="text-sm font-medium text-yellow-800 mb-2">➕ Créer un nouveau produit</div>
-                        
-                        <input type="text" id="nouveau_nom" placeholder="Nom du produit *"
-                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg">
-                        
-                        <input type="text" id="nouveau_marque" placeholder="Marque"
-                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg">
-                        
-                        <textarea id="nouveau_description" placeholder="Description" rows="2"
-                                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"></textarea>
-                        
-                        <button type="button" onclick="creerProduit()" 
-                                class="w-full bg-yellow-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-yellow-700">
-                            ✅ Créer ce produit
-                        </button>
-                    </div>
-                    
-                    <button type="button" onclick="afficherFormulaireProduit()" id="btn_creer_produit"
-                            class="mt-2 text-sm text-blue-600 hover:underline">
-                        + Créer un produit manuellement
-                    </button>
+                    <input type="text" id="ean" 
+                           placeholder="Scannez le code-barres"
+                           autofocus
+                           required
+                           class="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <p class="text-sm text-gray-500 mt-1">Recherche automatique du produit</p>
                 </div>
 
-                <!-- Scan Code Article -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        🏷️ Code Article (GGxxxx) *
-                    </label>
-                    <input type="text" id="article_scan" placeholder="Ex: GG0001" required
-                           pattern="GG\d{4}" maxlength="6"
-                           class="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent uppercase">
-                    <div class="text-xs text-gray-500 mt-1">Format: GG0001, GG0042, etc.</div>
+                <div id="produit_info" class="hidden bg-blue-50 border border-blue-200 rounded-md p-4">
+                    <div class="font-bold text-gray-800" id="produit_nom"></div>
+                    <div class="text-sm text-gray-600" id="produit_marque"></div>
                 </div>
 
-                <!-- Scan Emplacement -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        📍 Code Emplacement (EMPxxx) *
+                    <label class="block text-lg font-medium text-gray-700 mb-2">
+                        Emplacement *
                     </label>
-                    <input type="text" id="emplacement_scan" placeholder="Ex: EMP001" required
-                           pattern="EMP\d{3}" maxlength="6"
-                           class="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent uppercase">
-                    <div id="emplacement_info" class="mt-2 hidden p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <div class="text-blue-800 font-medium text-sm" id="emplacement_nom"></div>
-                        <div class="text-blue-600 text-xs" id="emplacement_details"></div>
-                    </div>
-                    <input type="hidden" id="emplacement_id">
+                    <select id="emplacement_id" required
+                            class="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <option value="">-- Sélectionner --</option>
+                    </select>
                 </div>
 
-                <!-- Quantité -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label class="block text-lg font-medium text-gray-700 mb-2">
+                        Code Article *
+                    </label>
+                    <input type="text" id="code_article" 
+                           placeholder="Format: GGxxxx (ex: GG0001)"
+                           pattern="[Gg]{2}\d{4}"
+                           required
+                           class="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <p class="text-sm text-gray-500 mt-1">Format: GG#### (ex: GG0001)</p>
+                </div>
+
+                <div>
+                    <label class="block text-lg font-medium text-gray-700 mb-2">
                         Quantité *
                     </label>
-                    <input type="number" id="quantite" min="1" value="1" required
-                           class="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <input type="number" id="quantite" 
+                           value="1" 
+                           min="1" 
+                           required
+                           class="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                 </div>
 
-                <!-- Date de Péremption -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Date de Péremption
+                    <label class="block text-lg font-medium text-gray-700 mb-2">
+                        Date de Péremption (optionnel)
                     </label>
                     <input type="date" id="date_peremption"
-                           class="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                           class="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <p class="text-sm text-gray-500 mt-1">Pour les denrées alimentaires uniquement</p>
                 </div>
 
-                <!-- Commentaire -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label class="block text-lg font-medium text-gray-700 mb-2">
                         Commentaire
                     </label>
-                    <textarea id="commentaire" rows="3" placeholder="Notes..."
-                              class="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"></textarea>
+                    <textarea id="commentaire" 
+                              rows="3" 
+                              placeholder="Notes, remarques, état de l'article..."
+                              class="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
                 </div>
 
-                <!-- Bouton Valider -->
                 <button type="submit" 
-                        class="w-full bg-green-600 text-white py-4 rounded-lg text-lg font-bold active:bg-green-700 shadow-lg">
-                    ✅ Valider l'Entrée
+                        class="w-full bg-green-600 text-white py-4 text-xl font-bold rounded-md hover:bg-green-700 transition">
+                    ✅ Enregistrer l'Entrée
                 </button>
-
             </form>
 
             <div id="message" class="mt-4 hidden"></div>
-
         </div>
-
     </div>
 
     <script>
         const API_URL = 'http://' + window.location.hostname + ':8000';
+        let produitTrouve = null;
 
-        // Recherche EAN via proxy backend
-        async function rechercherEAN() {
-            const ean = document.getElementById('ean_scan').value.trim();
-            if (!ean) {
-                afficherFormulaireProduit();
-                return;
-            }
+        window.onload = function() {
+            chargerEmplacements();
+        };
 
-            // Afficher indicateur
-            const btn = event?.target;
-            if (btn) {
-                btn.textContent = '⏳';
-                btn.disabled = true;
+        async function chargerEmplacements() {
+            try {
+                const response = await fetch(`${API_URL}/emplacements/`);
+                const emplacements = await response.json();
+                
+                const select = document.getElementById('emplacement_id');
+                emplacements.forEach(emp => {
+                    const option = document.createElement('option');
+                    option.value = emp.id;
+                    option.textContent = `${emp.code_emplacement} - ${emp.nom}`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erreur chargement emplacements:', error);
             }
+        }
+
+        document.getElementById('ean').addEventListener('blur', async function() {
+            const ean = this.value.trim();
+            if (!ean) return;
 
             try {
-                // 1. Chercher en base locale
-                console.log('🔍 Recherche en base locale...');
                 const response = await fetch(`${API_URL}/produits/`);
                 const produits = await response.json();
                 const produit = produits.find(p => p.ean === ean);
 
                 if (produit) {
-                    console.log('✅ Trouvé en base locale');
-                    afficherProduit(produit);
-                    if (btn) {
-                        btn.textContent = '🔍';
-                        btn.disabled = false;
+                    produitTrouve = produit;
+                    afficherInfoProduit(produit);
+                } else {
+                    const confirmer = confirm(`EAN ${ean} inconnu.\n\nVoulez-vous créer ce produit ?`);
+                    if (confirmer) {
+                        await creerProduitDepuisWeb(ean);
                     }
-                    return;
                 }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('⚠️ Erreur de recherche');
+            }
+        });
 
-                // 2. Chercher via proxy backend (OpenFoodFacts + Barcodelookup)
-                console.log('🔍 Recherche via proxy backend...');
+        function afficherInfoProduit(produit) {
+            document.getElementById('produit_nom').textContent = produit.nom;
+            document.getElementById('produit_marque').textContent = produit.marque ? `🏷️ ${produit.marque}` : '';
+            document.getElementById('produit_info').classList.remove('hidden');
+        }
+
+        async function creerProduitDepuisWeb(ean) {
+            try {
                 const proxyResponse = await fetch(`${API_URL}/recherche-ean/${ean}`);
                 
-                if (btn) {
-                    btn.textContent = '🔍';
-                    btn.disabled = false;
-                }
-
                 if (proxyResponse.ok) {
-                    const data = await proxyResponse.json();
-                    console.log(`✅ Trouvé sur ${data.source}`);
+                    const product = await proxyResponse.json();
                     
-                    const product = {
-                        nom: data.nom,
-                        marque: data.marque,
-                        description: data.description
+                    const data = {
+                        ean: ean,
+                        nom: product.nom,
+                        marque: product.marque,
+                        description: product.description
                     };
                     
-                    if (confirm(`✅ Produit trouvé (${data.source}) :\n\n${product.nom}\nMarque : ${product.marque || 'Inconnue'}\n\nCréer ce produit automatiquement ?`)) {
-                        await creerProduitDepuisWeb(product, ean);
-                    } else {
-                        afficherFormulaireProduit();
+                    const createResponse = await fetch(`${API_URL}/produits/`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (createResponse.ok) {
+                        const nouveauProduit = await createResponse.json();
+                        produitTrouve = nouveauProduit;
+                        afficherInfoProduit(nouveauProduit);
+                        alert(`✅ Produit créé:\n${nouveauProduit.nom}`);
                     }
                 } else {
-                    console.log('❌ Produit non trouvé nulle part');
-                    alert(`ℹ️ EAN ${ean} non trouvé.\n\nVeuillez saisir les informations manuellement.`);
-                    afficherFormulaireProduit();
-                }
-            } catch (error) {
-                if (btn) {
-                    btn.textContent = '🔍';
-                    btn.disabled = false;
-                }
-                console.error('Erreur:', error);
-                alert('⚠️ Erreur de recherche.\n\nVeuillez saisir les informations manuellement.');
-                afficherFormulaireProduit();
-            }
-        }
-
-        // Créer produit depuis données web
-        async function creerProduitDepuisWeb(product, ean) {
-            const data = {
-                ean: ean,
-                nom: product.nom,
-                marque: product.marque,
-                description: product.description
-            };
-
-            try {
-                const response = await fetch(`${API_URL}/produits/`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    const nouveauProduit = await response.json();
-                    afficherProduit(nouveauProduit);
-                    alert('✅ Produit créé automatiquement !');
-                } else {
-                    const error = await response.json();
-                    alert('❌ Erreur création produit: ' + error.detail);
+                    const nom = prompt('EAN non trouvé sur les bases de données.\n\nNom du produit:');
+                    if (nom) {
+                        const createResponse = await fetch(`${API_URL}/produits/`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                ean: ean,
+                                nom: nom,
+                                marque: null,
+                                description: null
+                            })
+                        });
+                        
+                        if (createResponse.ok) {
+                            const nouveauProduit = await createResponse.json();
+                            produitTrouve = nouveauProduit;
+                            afficherInfoProduit(nouveauProduit);
+                            alert(`✅ Produit créé: ${nom}`);
+                        }
+                    }
                 }
             } catch (error) {
                 console.error('Erreur:', error);
-                alert('❌ Erreur de connexion');
+                alert('⚠️ Erreur lors de la création du produit');
             }
         }
 
-        // Afficher formulaire création manuelle
-        function afficherFormulaireProduit() {
-            document.getElementById('form_produit_manuel').classList.remove('hidden');
-            document.getElementById('btn_creer_produit').classList.add('hidden');
-        }
-
-        // Créer produit manuellement
-        async function creerProduit() {
-            const nom = document.getElementById('nouveau_nom').value.trim();
-            if (!nom) {
-                alert('❌ Le nom est obligatoire');
-                return;
-            }
-
-            const ean = document.getElementById('ean_scan').value.trim();
-
-            const data = {
-                ean: ean || null,
-                nom: nom,
-                marque: document.getElementById('nouveau_marque').value.trim() || null,
-                description: document.getElementById('nouveau_description').value.trim() || null
-            };
-
-            console.log('📤 Création produit:', data);
-
-            try {
-                const response = await fetch(`${API_URL}/produits/`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    const nouveauProduit = await response.json();
-                    console.log('✅ Produit créé:', nouveauProduit);
-                    
-                    // Afficher le produit
-                    afficherProduit(nouveauProduit);
-                    
-                    // Masquer le formulaire
-                    document.getElementById('form_produit_manuel').classList.add('hidden');
-                    document.getElementById('btn_creer_produit').classList.remove('hidden');
-                    
-                    // Vider les champs
-                    document.getElementById('nouveau_nom').value = '';
-                    document.getElementById('nouveau_marque').value = '';
-                    document.getElementById('nouveau_description').value = '';
-                    
-                    alert('✅ Produit créé avec succès !');
-                } else {
-                    const error = await response.json();
-                    console.error('❌ Erreur API:', error);
-                    alert('❌ Erreur: ' + (error.detail || 'Erreur inconnue'));
-                }
-            } catch (error) {
-                console.error('❌ Erreur réseau:', error);
-                alert('❌ Erreur de connexion au serveur');
-            }
-        }
-
-        // Afficher infos produit
-        function afficherProduit(produit) {
-            document.getElementById('produit_id').value = produit.id;
-            document.getElementById('produit_nom').textContent = produit.nom;
-            document.getElementById('produit_details').textContent = 
-                `${produit.marque || 'Sans marque'} ${produit.ean ? '- EAN: ' + produit.ean : ''}`;
-            document.getElementById('produit_info').classList.remove('hidden');
-            document.getElementById('form_produit_manuel').classList.add('hidden');
-            document.getElementById('btn_creer_produit').classList.add('hidden');
-        }
-
-        // Au blur de l'EAN
-        document.getElementById('ean_scan').addEventListener('blur', function() {
-            if (this.value.trim()) {
-                rechercherEAN();
-            }
-        });
-
-        // Recherche emplacement par code
-        document.getElementById('emplacement_scan').addEventListener('blur', async function() {
-            const code = this.value.trim().toUpperCase();
-            if (!code) return;
-
-            try {
-                const response = await fetch(`${API_URL}/emplacements/`);
-                const emplacements = await response.json();
-                const emplacement = emplacements.find(e => e.code_emplacement === code);
-
-                const infoDiv = document.getElementById('emplacement_info');
-                if (emplacement) {
-                    document.getElementById('emplacement_id').value = emplacement.id;
-                    document.getElementById('emplacement_nom').textContent = emplacement.nom;
-                    document.getElementById('emplacement_details').textContent = 
-                        `Code: ${emplacement.code_emplacement} - Niveau ${emplacement.niveau}`;
-                    infoDiv.classList.remove('hidden');
-                } else {
-                    alert(`❌ Aucun emplacement trouvé avec le code: ${code}`);
-                    this.value = '';
-                    this.focus();
-                }
-            } catch (error) {
-                console.error('Erreur recherche emplacement:', error);
-                alert('❌ Erreur de connexion');
-            }
-        });
-
-        // Forcer majuscules
-        document.getElementById('article_scan').addEventListener('input', function() {
-            this.value = this.value.toUpperCase();
-        });
-        document.getElementById('emplacement_scan').addEventListener('input', function() {
-            this.value = this.value.toUpperCase();
-        });
-
-        // Soumission
         document.getElementById('formEntree').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const produit_id = document.getElementById('produit_id').value;
-            const emplacement_id = document.getElementById('emplacement_id').value;
-
-            if (!produit_id) {
-                alert('❌ Veuillez scanner un EAN ou créer un produit');
-                return;
-            }
-            if (!emplacement_id) {
-                alert('❌ Veuillez scanner un emplacement valide');
+            if (!produitTrouve) {
+                alert('⚠️ Veuillez d\'abord scanner un code-barres valide');
                 return;
             }
 
-            const codeArticle = document.getElementById('article_scan').value.toUpperCase();
             const dateInput = document.getElementById('date_peremption').value;
+            let datePeremption = null;
+            if (dateInput && dateInput !== '') {
+                datePeremption = dateInput + 'T00:00:00Z';
+            }
 
             const data = {
-                code_article: codeArticle,
-                produit_id: parseInt(produit_id),
-                emplacement_id: parseInt(emplacement_id),
+                code_article: document.getElementById('code_article').value.toUpperCase(),
+                produit_id: produitTrouve.id,
+                emplacement_id: parseInt(document.getElementById('emplacement_id').value),
                 quantite: parseInt(document.getElementById('quantite').value),
-                date_peremption: dateInput ? dateInput + 'T00:00:00Z' : null,
+                date_peremption: datePeremption,
                 commentaire: document.getElementById('commentaire').value || null
             };
 
             try {
-                const createResponse = await fetch(`${API_URL}/articles/`, {
+                const response = await fetch(`${API_URL}/articles/`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(data)
                 });
 
                 const messageDiv = document.getElementById('message');
-                if (createResponse.ok) {
-                    messageDiv.className = 'mt-4 p-4 bg-green-100 text-green-800 rounded-lg font-medium';
-                    messageDiv.textContent = `✅ Article ${codeArticle} ajouté avec succès !`;
+
+                if (response.ok) {
+                    messageDiv.className = 'p-4 bg-green-100 text-green-800 rounded-md text-lg';
+                    messageDiv.textContent = '✅ Entrée enregistrée avec succès !';
                     messageDiv.classList.remove('hidden');
                     
-                    setTimeout(() => {
-                        window.location.href = 'home.html';
-                    }, 1500);
+                    document.getElementById('formEntree').reset();
+                    document.getElementById('produit_info').classList.add('hidden');
+                    produitTrouve = null;
+                    document.getElementById('ean').focus();
+
+                    setTimeout(() => messageDiv.classList.add('hidden'), 3000);
                 } else {
-                    const error = await createResponse.json();
-                    messageDiv.className = 'mt-4 p-4 bg-red-100 text-red-800 rounded-lg';
-                    messageDiv.textContent = '❌ Erreur: ' + error.detail;
+                    const error = await response.json();
+                    messageDiv.className = 'p-4 bg-red-100 text-red-800 rounded-md text-lg';
+                    messageDiv.textContent = '❌ Erreur: ' + (error.detail || JSON.stringify(error));
                     messageDiv.classList.remove('hidden');
                 }
             } catch (error) {
-                alert('❌ Erreur de connexion');
-                console.error(error);
+                const messageDiv = document.getElementById('message');
+                messageDiv.className = 'p-4 bg-red-100 text-red-800 rounded-md text-lg';
+                messageDiv.textContent = '❌ Erreur de connexion';
+                messageDiv.classList.remove('hidden');
+                console.error('Erreur:', error);
             }
         });
     </script>
 </body>
 </html>
-```
-
-**Sauvegardez** : `Ctrl+X`, `Y`, `Enter`
-
----
-
-## 🧪 Testez
-```
-Ctrl + Shift + R

@@ -8,6 +8,7 @@ class ProduitBase(BaseModel):
     nom: str
     marque: Optional[str] = None
     description: Optional[str] = None
+    image_url: Optional[str] = None
 
 class ProduitCreate(ProduitBase):
     pass
@@ -17,6 +18,7 @@ class ProduitUpdate(BaseModel):
     nom: Optional[str] = None
     marque: Optional[str] = None
     description: Optional[str] = None
+    image_url: Optional[str] = None
 
 class Produit(ProduitBase):
     id: int
@@ -33,6 +35,7 @@ class EmplacementBase(BaseModel):
     parent_id: Optional[int] = None
     niveau: int = 1
     description: Optional[str] = None
+    image_url: Optional[str] = None
 
 class EmplacementCreate(EmplacementBase):
     pass
@@ -42,6 +45,7 @@ class EmplacementUpdate(BaseModel):
     parent_id: Optional[int] = None
     niveau: Optional[int] = None
     description: Optional[str] = None
+    image_url: Optional[str] = None
 
 class Emplacement(EmplacementBase):
     id: int

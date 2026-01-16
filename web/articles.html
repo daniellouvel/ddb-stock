@@ -40,7 +40,7 @@
                             Code Article *
                         </label>
                         <input type="text" id="code_article" 
-                               pattern="GG[0-9]{4}" 
+                               pattern="[Gg]{2}[0-9]{4}" 
                                placeholder="GG0001" 
                                required
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -452,9 +452,9 @@
                     setTimeout(() => messageDiv.classList.add('hidden'), 3000);
                 } else {
                     const error = await response.json();
-                    messageDiv.className = 'mt-4 p-3 bg-red-100 text-red-800 rounded-md';
-                    messageDiv.textContent = '❌ Erreur: ' + error.detail;
-                    messageDiv.classList.remove('hidden');
+    		    messageDiv.className = 'mt-4 p-3 bg-red-100 text-red-800 rounded-md';
+                    messageDiv.textContent = '❌ Erreur: ' + (error.detail || JSON.stringify(error));
+   		    messageDiv.classList.remove('hidden');
                 }
             } catch (error) {
                 const messageDiv = document.getElementById('message');

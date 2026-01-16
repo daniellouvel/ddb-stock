@@ -12,6 +12,9 @@ router = APIRouter(prefix="/articles", tags=["Articles"])
 def creer_article(article: ArticleCreate, db: Session = Depends(get_db)):
     """Créer un nouvel article"""
     
+    # Convertir en majuscules
+    article.code_article = article.code_article.upper()
+    
     # Vérifier que le produit existe
     produit = db.query(Produit).filter(Produit.id == article.produit_id).first()
     if not produit:
@@ -211,7 +214,10 @@ def articles_expires(db: Session = Depends(get_db)):
 @router.get("/code/{code_article}", response_model=ArticleDetail)
 def chercher_par_code(code_article: str, db: Session = Depends(get_db)):
     """Chercher un article par son code"""
-    article = db.query(Article).filter(Article.code_article == code_article.upper()).first()
+    # Convertir en majuscules pour la recherche
+    code_article = code_article.upper()
+    
+    article = db.query(Article).filter(Article.code_article == code_article).first()
     if not article:
         raise HTTPException(status_code=404, detail=f"Article {code_article} non trouvé")
     

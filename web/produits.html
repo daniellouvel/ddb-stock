@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-    <!-- Header -->
     <header class="bg-blue-600 text-white shadow-lg">
         <div class="container mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
@@ -28,7 +27,6 @@
     <div class="container mx-auto px-4 py-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
-            <!-- Formulaire Ajout/Modification -->
             <div class="bg-white rounded-lg shadow-lg p-6">
                 <h2 class="text-xl font-bold mb-4 text-gray-800" id="formTitle">➕ Ajouter un Produit</h2>
                 
@@ -39,11 +37,16 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">
                             Code EAN (optionnel)
                         </label>
-                        <input type="text" id="ean" 
-                               pattern="[0-9]{8,13}" 
-                               placeholder="1234567890123 (8 à 13 chiffres)" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <p class="text-xs text-gray-500 mt-1">Code-barres du produit (8 à 13 chiffres)</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="ean" 
+                                   placeholder="Scannez ou saisissez l'EAN"
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button type="button" onclick="rechercherEAN()" 
+                                    class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                                🔍
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Recherche automatique des informations produit</p>
                     </div>
 
                     <div>
@@ -51,7 +54,7 @@
                             Nom du Produit *
                         </label>
                         <input type="text" id="nom" 
-                               placeholder="Tournevis cruciforme, Vis M4x20..." 
+                               placeholder="Ex: Eau minérale Evian 1.5L" 
                                required
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
@@ -61,7 +64,7 @@
                             Marque
                         </label>
                         <input type="text" id="marque" 
-                               placeholder="Stanley, Bosch, Samsung..." 
+                               placeholder="Ex: Evian"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
 
@@ -70,8 +73,8 @@
                             Description
                         </label>
                         <textarea id="description" 
-                                  rows="4" 
-                                  placeholder="Description détaillée du produit, caractéristiques techniques..."
+                                  rows="3" 
+                                  placeholder="Description détaillée du produit..."
                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                     </div>
 
@@ -93,7 +96,6 @@
                 <div id="message" class="mt-4 hidden"></div>
             </div>
 
-            <!-- Liste des Produits -->
             <div class="bg-white rounded-lg shadow-lg p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-gray-800">📦 Liste des Produits</h2>
@@ -103,27 +105,14 @@
                     </button>
                 </div>
 
-                <div class="mb-4 space-y-2">
-                    <input type="text" 
-                           id="searchInput" 
-                           placeholder="🔍 Rechercher par nom, marque ou EAN..."
-                           onkeyup="filtrerProduits()"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    
-                    <div class="flex gap-2">
-                        <button onclick="trierProduits('nom')" 
-                                class="text-sm px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition">
-                            Trier par Nom
-                        </button>
-                        <button onclick="trierProduits('marque')" 
-                                class="text-sm px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition">
-                            Trier par Marque
-                        </button>
-                    </div>
-                </div>
+                <input type="text" 
+                       id="searchInput" 
+                       placeholder="🔍 Rechercher un produit..."
+                       onkeyup="filtrerProduits()"
+                       class="w-full px-3 py-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
 
                 <div class="text-sm text-gray-600 mb-2">
-                    <span id="compteur">-</span> produit(s)
+                    <span id="compteur">0</span> produit(s)
                 </div>
 
                 <div id="listeProduits" class="space-y-2 max-h-[600px] overflow-y-auto">
@@ -141,12 +130,10 @@
         let produitsAffiches = [];
         let modeModification = false;
 
-        // Charger les produits au démarrage
         window.onload = function() {
             chargerProduits();
         };
 
-        // Charger tous les produits
         async function chargerProduits() {
             try {
                 const response = await fetch(`${API_URL}/produits/`);
@@ -162,7 +149,6 @@
             }
         }
 
-        // Afficher les produits
         function afficherProduits() {
             const container = document.getElementById('listeProduits');
             
@@ -174,42 +160,22 @@
             let html = '';
             produitsAffiches.forEach(produit => {
                 html += `
-                    <div class="border border-gray-200 rounded-md p-4 hover:bg-gray-50 transition produit-item"
-                         data-nom="${produit.nom.toLowerCase()}"
-                         data-marque="${(produit.marque || '').toLowerCase()}"
-                         data-ean="${(produit.ean || '').toLowerCase()}">
+                    <div class="border border-gray-200 rounded-md p-4 hover:bg-gray-50 transition">
                         <div class="flex justify-between items-start">
                             <div class="flex-1">
-                                <div class="font-bold text-lg text-gray-800">
-                                    ${produit.nom}
-                                </div>
-                                ${produit.marque ? 
-                                    `<div class="text-sm text-gray-600 mt-1">
-                                        🏷️ ${produit.marque}
-                                    </div>` : 
-                                    ''}
-                                ${produit.ean ? 
-                                    `<div class="text-sm text-gray-500 mt-1">
-                                        📊 EAN: ${produit.ean}
-                                    </div>` : 
-                                    ''}
-                                ${produit.description ? 
-                                    `<div class="text-sm text-gray-600 mt-2 italic">
-                                        ${produit.description}
-                                    </div>` : 
-                                    ''}
-                                <div class="text-xs text-gray-400 mt-2">
-                                    ID: ${produit.id} • Créé le ${new Date(produit.created_at).toLocaleDateString('fr-FR')}
-                                </div>
+                                <div class="font-bold text-gray-800">${produit.nom}</div>
+                                ${produit.marque ? `<div class="text-sm text-gray-600 mt-1">🏷️ ${produit.marque}</div>` : ''}
+                                ${produit.ean ? `<div class="text-xs text-gray-500 mt-1">EAN: ${produit.ean}</div>` : ''}
+                                ${produit.description ? `<div class="text-sm text-gray-600 mt-2">${produit.description}</div>` : ''}
                             </div>
                             <div class="flex gap-2 ml-4">
-                                <button onclick='modifierProduit(${JSON.stringify(produit)})' 
+                                <button onclick='modifierProduit(${JSON.stringify(produit).replace(/'/g, "&#39;")})' 
                                         class="text-blue-600 hover:text-blue-800 px-3 py-1 border border-blue-600 rounded hover:bg-blue-50 transition text-sm">
                                     ✏️ Modifier
                                 </button>
-                                <button onclick="supprimerProduit(${produit.id}, '${produit.nom.replace(/'/g, "\\'")}')" 
+                                <button onclick="supprimerProduit(${produit.id}, '${produit.nom.replace(/'/g, "\\'")}' )" 
                                         class="text-red-600 hover:text-red-800 px-3 py-1 border border-red-600 rounded hover:bg-red-50 transition text-sm">
-                                    🗑️ Supprimer
+                                    🗑️
                                 </button>
                             </div>
                         </div>
@@ -220,7 +186,54 @@
             container.innerHTML = html;
         }
 
-        // Ajouter ou modifier un produit
+        async function rechercherEAN() {
+            const ean = document.getElementById('ean').value.trim();
+            if (!ean) {
+                return;
+            }
+
+            const btn = event?.target;
+            if (btn) {
+                btn.textContent = '⏳';
+                btn.disabled = true;
+            }
+
+            try {
+                const proxyResponse = await fetch(`${API_URL}/recherche-ean/${ean}`);
+                
+                if (btn) {
+                    btn.textContent = '🔍';
+                    btn.disabled = false;
+                }
+
+                if (proxyResponse.ok) {
+                    const data = await proxyResponse.json();
+                    console.log(`✅ Trouvé sur ${data.source}`, data);
+                    
+                    document.getElementById('nom').value = data.nom || '';
+                    document.getElementById('marque').value = data.marque || '';
+                    document.getElementById('description').value = data.description || '';
+                    
+                    alert(`✅ Produit trouvé (${data.source}) :\n\n${data.nom}\nMarque : ${data.marque || 'Inconnue'}`);
+                } else {
+                    alert(`ℹ️ EAN ${ean} non trouvé.\n\nVeuillez saisir les informations manuellement.`);
+                }
+            } catch (error) {
+                if (btn) {
+                    btn.textContent = '🔍';
+                    btn.disabled = false;
+                }
+                console.error('Erreur:', error);
+                alert('⚠️ Erreur de recherche.');
+            }
+        }
+
+        document.getElementById('ean').addEventListener('blur', function() {
+            if (this.value.trim()) {
+                rechercherEAN();
+            }
+        });
+
         document.getElementById('formProduit').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -235,14 +248,12 @@
             try {
                 let response;
                 if (modeModification && id) {
-                    // Modification
                     response = await fetch(`${API_URL}/produits/${id}`, {
                         method: 'PUT',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(data)
                     });
                 } else {
-                    // Ajout
                     response = await fetch(`${API_URL}/produits/`, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
@@ -266,16 +277,18 @@
                 } else {
                     const error = await response.json();
                     messageDiv.className = 'mt-4 p-3 bg-red-100 text-red-800 rounded-md';
-                    messageDiv.textContent = '❌ Erreur: ' + error.detail;
+                    messageDiv.textContent = '❌ Erreur: ' + (error.detail || JSON.stringify(error));
                     messageDiv.classList.remove('hidden');
                 }
             } catch (error) {
-                alert('❌ Erreur de connexion à l\'API');
-                console.error(error);
+                const messageDiv = document.getElementById('message');
+                messageDiv.className = 'mt-4 p-3 bg-red-100 text-red-800 rounded-md';
+                messageDiv.textContent = '❌ Erreur de connexion';
+                messageDiv.classList.remove('hidden');
+                console.error('Erreur:', error);
             }
         });
 
-        // Modifier un produit
         function modifierProduit(produit) {
             modeModification = true;
             
@@ -289,11 +302,9 @@
             document.getElementById('btnSubmit').textContent = '💾 Enregistrer';
             document.getElementById('btnSubmit').className = 'flex-1 bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition';
             
-            // Scroll vers le formulaire
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Annuler modification
         function annulerModification() {
             modeModification = false;
             
@@ -306,9 +317,8 @@
             document.getElementById('btnSubmit').className = 'flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition';
         }
 
-        // Supprimer un produit
         async function supprimerProduit(id, nom) {
-            if (!confirm(`Voulez-vous vraiment supprimer le produit "${nom}" ?\n\nAttention: impossible si des articles existent pour ce produit.`)) {
+            if (!confirm(`Voulez-vous vraiment supprimer le produit "${nom}" ?`)) {
                 return;
             }
 
@@ -330,37 +340,21 @@
             }
         }
 
-        // Filtrer les produits
         function filtrerProduits() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             
-            if (search === '') {
-                produitsAffiches = [...produits];
-            } else {
-                produitsAffiches = produits.filter(p => 
-                    p.nom.toLowerCase().includes(search) ||
-                    (p.marque && p.marque.toLowerCase().includes(search)) ||
-                    (p.ean && p.ean.toLowerCase().includes(search)) ||
-                    (p.description && p.description.toLowerCase().includes(search))
-                );
-            }
+            produitsAffiches = produits.filter(produit => {
+                return search === '' || 
+                    produit.nom.toLowerCase().includes(search) ||
+                    (produit.marque && produit.marque.toLowerCase().includes(search)) ||
+                    (produit.ean && produit.ean.includes(search)) ||
+                    (produit.description && produit.description.toLowerCase().includes(search));
+            });
             
             afficherProduits();
             mettreAJourCompteur();
         }
 
-        // Trier les produits
-        function trierProduits(critere) {
-            produitsAffiches.sort((a, b) => {
-                const valA = (a[critere] || '').toLowerCase();
-                const valB = (b[critere] || '').toLowerCase();
-                return valA.localeCompare(valB);
-            });
-            
-            afficherProduits();
-        }
-
-        // Mettre à jour le compteur
         function mettreAJourCompteur() {
             const total = produits.length;
             const affiches = produitsAffiches.length;
@@ -374,62 +368,3 @@
     </script>
 </body>
 </html>
-```
-
----
-
-## ✅ Sauvegarder et Tester
-
-**Accédez à la page Produits** :
-```
-http://192.168.1.200:8000/web/produits.html
-```
-
----
-
-## 🎯 Fonctionnalités de la Page Produits
-
-✅ **Formulaire ajout/modification** avec validation  
-✅ **Support EAN** (code-barres 8-13 chiffres)  
-✅ **Modification inline** - cliquer sur Modifier remplit le formulaire  
-✅ **Suppression** avec confirmation et vérification (pas d'articles liés)  
-✅ **Recherche en temps réel** (nom, marque, EAN, description)  
-✅ **Tri** par nom ou marque  
-✅ **Compteur** de produits affichés  
-✅ **Design moderne** avec Tailwind CSS  
-✅ **Responsive** (mobile-friendly)  
-
----
-
-## 📋 Exemple de Test
-
-### **Créer plusieurs produits** :
-
-**1. Produit avec EAN**
-- EAN: `3245678901234`
-- Nom: `Tournevis cruciforme PH2`
-- Marque: `Stanley`
-- Description: `Tournevis professionnel avec manche bi-matière`
-
-**2. Produit sans EAN**
-- Nom: `Vis acier M4x20`
-- Marque: `Brico`
-- Description: `Lot de 100 vis acier zingué`
-
-**3. Produit électronique**
-- EAN: `8806090123456`
-- Nom: `Résistance 10KΩ`
-- Marque: `Yageo`
-- Description: `Résistance 1/4W 5% pour circuits électroniques`
-
----
-
-## 🎨 Navigation Complète
-
-Votre application web est maintenant complète :
-```
-http://192.168.1.200:8000/web/
-├── index.html         ✅ Dashboard avec stats
-├── produits.html      ✅ Gestion produits (nouveau!)
-├── emplacements.html  ✅ Gestion emplacements
-└── articles.html      ⏳ Gestion articles (à créer)

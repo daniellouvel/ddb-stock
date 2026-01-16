@@ -14,6 +14,8 @@ app = FastAPI(
     version="2.0.0"
 )
 
+# Servir les fichiers statiques (images)
+
 # CORS (pour permettre accès depuis navigateur)
 app.add_middleware(
     CORSMiddleware,
